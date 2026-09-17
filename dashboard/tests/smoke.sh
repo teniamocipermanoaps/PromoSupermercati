@@ -55,12 +55,23 @@ token_di() {
 
 contiene() {
   local descrizione="$1" percorso="$2" atteso="$3"
-  if curl -s -b "$COOKIE" -c "$COOKIE" "$BASE$percorso" | grep -qF "$atteso"; then
+  local corpo stato
+  # Il codice di risposta si guarda sempre: senza, una pagina che non e'
+  # arrivata (302 verso l'accesso, 500) si confonde con una pagina arrivata
+  # senza il testo cercato, e il fallimento diventa impossibile da spiegare.
+  corpo=$(mktemp)
+  stato=$(curl -s -b "$COOKIE" -c "$COOKIE" -o "$corpo" -w '%{http_code}' "$BASE$percorso")
+  if [ "$stato" != "200" ]; then
+    printf '  FAIL %s (%s ha risposto %s, non 200)\n' "$descrizione" "$percorso" "$stato"
+    FALLITI=$((FALLITI + 1))
+  elif grep -qF "$atteso" "$corpo"; then
     printf '  OK   %s\n' "$descrizione"
   else
-    printf '  FAIL %s (testo "%s" non trovato in %s)\n' "$descrizione" "$atteso" "$percorso"
+    printf '  FAIL %s (testo "%s" non trovato in %s, %s byte ricevuti)\n' \
+      "$descrizione" "$atteso" "$percorso" "$(wc -c < "$corpo")"
     FALLITI=$((FALLITI + 1))
   fi
+  rm -f "$corpo"
 }
 
 echo "== senza accesso non si entra =="

@@ -46,7 +46,14 @@ final class Percorsi
             return self::$base = '';
         }
 
-        if (preg_match('#^[A-Za-z0-9._~-]+(/[A-Za-z0-9._~-]+)*$#', $grezzo) !== 1) {
+        // Il punto e' ammesso dentro un segmento (promo.v2) ma un segmento che
+        // e' solo '.' o '..' e' risalita di cartella: '/../etc' come base
+        // passerebbe il controllo dei caratteri e produrrebbe indirizzi storti
+        // in ogni pagina.
+        $segmenti = explode('/', $grezzo);
+        $risalite = array_filter($segmenti, static fn (string $s): bool => $s === '.' || $s === '..');
+
+        if ($risalite !== [] || preg_match('#^[A-Za-z0-9._~-]+(/[A-Za-z0-9._~-]+)*$#', $grezzo) !== 1) {
             throw new RuntimeException(
                 "APP_BASE_PATH non e' un percorso valido: '{$grezzo}'. "
                 . "Esempio: APP_BASE_PATH=/promosupermercati"
