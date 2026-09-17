@@ -135,7 +135,8 @@ un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
 | Schema DB | migration 001-004 applicate e verificate su MariaDB 10.11 |
 | Dashboard | 4 pagine piu' l'accesso, usabile da telefono |
 | Crawler | contratto adapter, registro, gate robots, rate limiter, normalizzatore |
-| Adapter Conad / Carrefour / Lidl | **non scritti**, in attesa del gate legale |
+| Gate legale | robots.txt verificato il 2026-09-17: tutte e tre consentono. **Termini d'uso non ancora letti** |
+| Adapter Conad / Carrefour / Lidl | **non scritti**: le catene restano `enabled: false` finche' i ToS non sono letti |
 | Autenticazione | accesso con email e password, ogni pagina protetta |
 | Messa in opera | `docs/messa-in-opera.md`, configurazioni in `ops/deploy/`, controllo con `verifica_produzione.sh` |
 
@@ -144,7 +145,10 @@ un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
 1. **Mettere online la dashboard** su `gestionaletpmo.it/promosupermercati`,
    seguendo `docs/messa-in-opera.md`. Il certificato non e' facoltativo: su
    HTTP la password della segretaria viaggia in chiaro.
-2. **Il gate legale** su Conad, Carrefour e Lidl, che sblocca gli adapter.
+2. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
+   verificato e consente (2026-09-17, copie in `storage/legal/`), ma e' solo
+   meta' del gate: i ToS vietano spesso la raccolta automatica anche dove il
+   robots tace. Finche' non sono letti e annotati, `enabled` resta `false`.
 3. **Il riscontro delle segretarie** dopo la sessione (vedi
    `docs/sessione-segretarie.md`): attesi campi mancanti nella scheda del punto
    vendita e stati della richiesta diversi dai sei ipotizzati.
