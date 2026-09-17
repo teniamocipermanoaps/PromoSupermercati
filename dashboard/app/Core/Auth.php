@@ -8,8 +8,10 @@ namespace App\Core;
  * Sessione di accesso delle volontarie.
  *
  * In sessione sta il minimo per sapere chi sta lavorando: identificativo,
- * nome, email e ruolo. Tutto il resto si rilegge dal database quando serve,
- * cosi' una revoca o un cambio di nome non restano congelati in un cookie.
+ * nome, email, ruolo e un'impronta della credenziale. La riga vera si rilegge
+ * dal database a ogni richiesta (il controllo e' in public/index.php), cosi'
+ * una revoca o una password reimpostata valgono subito e non restano
+ * congelate in un cookie.
  *
  * Le sessioni sono file di PHP e non righe di tabella: l'utente applicativo
  * del database non ha il permesso di cancellare, e una tabella di sessioni
@@ -75,13 +77,57 @@ final class Auth
         // Anche il token CSRF riparte: era legato alla sessione anonima.
         unset($_SESSION['csrf']);
 
-        $_SESSION[self::CHIAVE_UTENTE] = [
+        $_SESSION[self::CHIAVE_UTENTE] = self::daRiga($riga);
+        $_SESSION[self::CHIAVE_ATTIVITA] = time();
+    }
+
+    /** L'identificativo di chi sta lavorando, 0 se non c'e' nessuno. */
+    public static function idUtente(): int
+    {
+        return (int) ($_SESSION[self::CHIAVE_UTENTE]['id'] ?? 0);
+    }
+
+    /**
+     * La password e' ancora quella con cui si era entrati?
+     *
+     * In sessione sta solo un'impronta dell'hash, non l'hash. Cosi'
+     * reimpostare la password di un accesso chiude anche le sessioni gia'
+     * aperte con la password vecchia, che e' quello che si vuole quando la si
+     * reimposta perche' qualcuno e' entrato.
+     *
+     * Una sessione aperta prima di questo controllo non ha l'impronta e viene
+     * chiusa: si sbaglia dalla parte giusta.
+     *
+     * @param array<string,mixed> $riga
+     */
+    public static function stessaCredenziale(array $riga): bool
+    {
+        $inSessione = $_SESSION[self::CHIAVE_UTENTE]['impronta'] ?? null;
+        return is_string($inSessione)
+            && hash_equals(self::impronta((string) $riga['password_hash']), $inSessione);
+    }
+
+    /** Riallinea nome e ruolo a quello che dice il database adesso. */
+    public static function aggiornaUtente(array $riga): void
+    {
+        $_SESSION[self::CHIAVE_UTENTE] = self::daRiga($riga);
+    }
+
+    /** @param array<string,mixed> $riga */
+    private static function daRiga(array $riga): array
+    {
+        return [
             'id' => (int) $riga['id'],
             'nome' => (string) $riga['full_name'],
             'email' => (string) $riga['email'],
             'ruolo' => (string) $riga['role'],
+            'impronta' => self::impronta((string) $riga['password_hash']),
         ];
-        $_SESSION[self::CHIAVE_ATTIVITA] = time();
+    }
+
+    private static function impronta(string $hash): string
+    {
+        return substr(hash('sha256', $hash), 0, 32);
     }
 
     /** Chiude la sessione e cancella il cookie dal browser. */

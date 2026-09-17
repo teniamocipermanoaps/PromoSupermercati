@@ -237,6 +237,10 @@ UPDATE users SET is_active = 0 WHERE email = 'maria@esempio.it';
 Si disattiva, non si cancella: l'utente applicativo non ha il permesso di
 cancellare, e la riga serve a capire chi aveva preso in carico quali contatti.
 
+Ha effetto **subito**, anche su una sessione gia' aperta. Lo stesso vale per la
+reimpostazione della password: se sospetti che qualcuno sia entrato, rieseguire
+`crea_utente.php` su quell'indirizzo chiude anche le sessioni in corso.
+
 **Cancellare i referenti** quando il rapporto con un punto vendita si chiude:
 sono dati personali raccolti per uno scopo, e finito lo scopo vanno tolti.
 Questo richiede un utente amministrativo del database, di proposito.

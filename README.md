@@ -144,7 +144,8 @@ password, riattiva l'accesso e toglie l'eventuale blocco: e' la via di
 recupero, perche' non c'e' un "password dimenticata" via email.
 
 Un accesso si revoca senza cancellarlo, perche' l'utente applicativo non ha il
-permesso di cancellare righe:
+permesso di cancellare righe. **Ha effetto subito**, anche su una sessione gia'
+aperta: ogni richiesta rilegge l'utente dal database.
 
 ```sql
 UPDATE users SET is_active = 0 WHERE email = 'maria@esempio.it';

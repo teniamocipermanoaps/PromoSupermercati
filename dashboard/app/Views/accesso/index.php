@@ -21,6 +21,11 @@ $messaggiErrore = [
 
   <?php if ($errore !== null && isset($messaggiErrore[$errore])): ?>
     <div class="avviso errore"><?= View::e($messaggiErrore[$errore]) ?></div>
+  <?php elseif (!empty($revocato)): ?>
+    <div class="avviso errore">
+      Questo accesso non e' piu' valido. Se non te lo aspettavi, chiedi a chi
+      cura il sistema.
+    </div>
   <?php elseif (!empty($uscita)): ?>
     <div class="avviso">Sei uscita dalla dashboard.</div>
   <?php endif; ?>

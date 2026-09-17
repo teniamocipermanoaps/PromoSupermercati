@@ -170,6 +170,37 @@ controlla "POST banchetto reindirizza" 302 "$banchetto"
 contiene "banchetto visibile in elenco" /banchetti "$NOTA_B"
 contiene "importo con decimali corretto" /banchetti "250,50"
 
+# La revoca non si vede da fuori: senza questa prova, il giorno in cui il
+# controllo sul database sparisse dal cancello nessuno se ne accorgerebbe, e
+# disattivare un accesso smetterebbe di disattivare qualcosa. Serve un client
+# mariadb e i permessi per scrivere su users, quindi e' facoltativa:
+#   SMOKE_DB=osservatorio_promo_demo dashboard/tests/smoke.sh
+if [ -n "${SMOKE_DB:-}" ] && command -v mariadb >/dev/null 2>&1; then
+  echo "== la revoca vale subito, non dal prossimo accesso =="
+  REVOCA=$(mktemp)
+  tok_revoca() {
+    curl -s -b "$REVOCA" -c "$REVOCA" "$BASE$1" \
+      | grep -o 'name="_csrf" value="[^"]*"' | head -1 | cut -d'"' -f4
+  }
+  T=$(tok_revoca /accesso)
+  curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -X POST \
+    --data-urlencode "_csrf=$T" --data-urlencode "email=$EMAIL" \
+    --data-urlencode "password=$PASSWORD" "$BASE/accesso"
+  aperta=$(curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -w '%{http_code}' "$BASE/")
+  controlla "sessione aperta prima della revoca" 200 "$aperta"
+
+  mariadb "$SMOKE_DB" -e "UPDATE users SET is_active = 0 WHERE email = '$EMAIL';"
+  chiusa=$(curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -w '%{http_code}' "$BASE/")
+  controlla "sessione gia' aperta chiusa dalla revoca" 302 "$chiusa"
+  scheda=$(curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -w '%{http_code}' "$BASE/punti-vendita/1")
+  controlla "e i dati dei referenti non si leggono piu'" 302 "$scheda"
+
+  mariadb "$SMOKE_DB" -e "UPDATE users SET is_active = 1 WHERE email = '$EMAIL';"
+  rm -f "$REVOCA"
+else
+  echo "== la revoca vale subito: saltata (serve SMOKE_DB e il client mariadb) =="
+fi
+
 echo "== uscita =="
 TOKEN=$(token_di /)
 uscita=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \

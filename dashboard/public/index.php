@@ -8,6 +8,7 @@ use App\Core\Csrf;
 use App\Core\Percorsi;
 use App\Core\Router;
 use App\Core\View;
+use App\Models\UserRepository;
 
 $radice = dirname(__DIR__);
 
@@ -30,7 +31,10 @@ Auth::avviaSessione();
 $percorso = Percorsi::interno($_SERVER['REQUEST_URI'] ?? '/');
 
 // Ogni POST deve portare un token valido: nessuna eccezione.
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::verifica($_POST['_csrf'] ?? null)) {
+// strtoupper come fa il Router: se i due confronti non combaciano, un metodo
+// scritto in minuscolo salterebbe il controllo del token ma verrebbe comunque
+// smistato sulla rotta POST.
+if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && !Csrf::verifica($_POST['_csrf'] ?? null)) {
     http_response_code(419);
     View::rendi('errore', [
         'titoloPagina' => 'Sessione scaduta',
@@ -38,6 +42,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::verifica($_POST['_csrf'] ?? 
         'messaggio' => 'Ricarica la pagina e riprova a inviare il modulo.',
     ]);
     return;
+}
+
+// L'accesso si riverifica sul database a ogni richiesta. Fidarsi della sola
+// sessione significa che una revoca (is_active = 0) vale solo dal prossimo
+// accesso: chi e' gia' dentro resta dentro finche' tiene il browser aperto, e
+// le sessioni sono file su disco che dal database non si possono cancellare.
+if (Auth::autenticata()) {
+    $utenteCorrente = UserRepository::trovaAttivoPerId(Auth::idUtente());
+
+    if ($utenteCorrente === null || !Auth::stessaCredenziale($utenteCorrente)) {
+        Auth::esci();
+        header('Location: ' . Percorsi::a('/accesso') . '?revocato=1');
+        return;
+    }
+
+    // Nome e ruolo tornano freschi a ogni pagina.
+    Auth::aggiornaUtente($utenteCorrente);
 }
 
 // Il cancello: chiuso per definizione. Una rotta nuova nasce protetta perche'

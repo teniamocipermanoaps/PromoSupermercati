@@ -19,13 +19,6 @@ use App\Models\UserRepository;
  */
 final class AccessoController
 {
-    /**
-     * Hash di una stringa casuale che nessuno conosce, verificato quando
-     * l'email non esiste: cosi' il tentativo costa quanto quello su un'email
-     * vera. Senza, il tempo di risposta direbbe chi ha un account.
-     */
-    private const HASH_FITTIZIO = '$2y$12$Xae37gWKjcKvVT16SkUpy.obt8k7JKbkgCdGkzhIvM0iQw9zUqaym';
-
     public function mostra(): void
     {
         if (Auth::autenticata()) {
@@ -50,8 +43,14 @@ final class AccessoController
         $utente = UserRepository::trovaPerEmail($email);
 
         if ($utente === null) {
-            // Si verifica comunque, per non finire prima quando l'email non c'e'.
-            password_verify($password, self::HASH_FITTIZIO);
+            // Si calcola comunque un hash, per non rispondere piu' in fretta
+            // quando l'email non esiste: il tempo di risposta direbbe chi ha
+            // un account. Si usa PASSWORD_DEFAULT, lo stesso con cui vengono
+            // create le password, invece di un hash fisso nel codice: un hash
+            // fisso resta al costo del giorno in cui e' stato generato, e se
+            // il PHP di produzione ne usa un altro la difesa si rovescia
+            // nell'oracolo che doveva chiudere.
+            password_hash($password, PASSWORD_DEFAULT);
             $this->rendi('credenziali', $ritorno);
             return;
         }
@@ -103,6 +102,7 @@ final class AccessoController
             'errore' => $errore,
             'ritorno' => $ritorno,
             'uscita' => isset($_GET['uscita']),
+            'revocato' => isset($_GET['revocato']),
             'minutiBlocco' => UserRepository::MINUTI_BLOCCO,
         ]);
     }

@@ -32,6 +32,27 @@ final class UserRepository
         );
     }
 
+    /**
+     * Rilegge un accesso ancora valido, per identificativo.
+     *
+     * Serve a ogni richiesta: una revoca deve valere subito, e le sessioni
+     * sono file su disco che il database non puo' cancellare.
+     *
+     * Non si guarda locked_until: quel blocco riguarda i tentativi di accesso,
+     * non chi sta gia' lavorando. Altrimenti sbagliare la password cinque
+     * volte basterebbe a buttare fuori una collega.
+     *
+     * @return array<string,mixed>|null
+     */
+    public static function trovaAttivoPerId(int $id): ?array
+    {
+        return Database::selezionaUno(
+            'SELECT id, email, full_name, password_hash, role
+             FROM users WHERE id = :id AND is_active = 1',
+            ['id' => $id]
+        );
+    }
+
     /** @param array<string,mixed> $utente */
     public static function bloccato(array $utente): bool
     {

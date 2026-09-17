@@ -54,6 +54,12 @@ cd crawler && python3 -m pytest -q        # 63 test
 # La dashboard e' chiusa: smoke.sh ha bisogno di credenziali valide.
 # demo.sh ne stampa una coppia usa e getta a ogni avvio.
 SMOKE_EMAIL=... SMOKE_PASSWORD=... dashboard/tests/smoke.sh
+
+php dashboard/tests/percorsi_test.php     # 40 prove, senza database ne' server
+
+# Con SMOKE_DB prova anche che la revoca chiuda una sessione gia' aperta.
+SMOKE_DB=osservatorio_promo_demo SMOKE_EMAIL=... SMOKE_PASSWORD=... \
+  dashboard/tests/smoke.sh
 ```
 
 Richiede MariaDB 10.6+ (colonne generate STORED, FULLTEXT su InnoDB) e PHP 8.2+
@@ -88,6 +94,14 @@ e il controllo sta li' dentro, prima del router: una rotta nuova nasce protetta
 perche' non e' in quell'elenco, non perche' qualcuno si e' ricordato di
 proteggerla. Non spostare il controllo dentro i controller, e non allungare
 l'elenco senza una ragione scritta.
+
+Subito prima del cancello, **ogni richiesta rilegge l'utente dal database**.
+Fidarsi della sola sessione significa che `is_active = 0` vale solo dal
+prossimo accesso: chi e' gia' dentro resta dentro, e le sessioni sono file su
+disco che dal database non si possono cancellare. In sessione sta anche
+un'impronta dell'hash della password, cosi' reimpostarla chiude le sessioni
+aperte con quella vecchia. `dashboard/tests/smoke.sh` con `SMOKE_DB` fa
+fallire la build se questo controllo sparisce.
 
 **I percorsi passano tutti da `App\Core\Percorsi`.** La dashboard puo' stare
 alla radice di un dominio o in una sottocartella
