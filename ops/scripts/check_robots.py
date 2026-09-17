@@ -22,8 +22,6 @@ chains.legal_notes; 2 significa che non si e' verificato niente, e non va
 scambiato per un divieto. In entrambi i casi non si raccoglie.
 """
 
-from __future__ import annotations
-
 import argparse
 import datetime as dt
 import pathlib
@@ -32,6 +30,12 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import urllib.robotparser
+from typing import Dict, List
+
+# Annotazioni con typing.List invece di list[str]: sui server Plesk il python3
+# di sistema e' spesso un 3.6, dove le generiche incorporate non esistono
+# ancora e il modulo non parte nemmeno. Il gate legale deve poter girare
+# proprio la', sulla macchina che raggiunge i siti delle catene.
 
 USER_AGENT = "OsservatorioPromoBot/0.1 (+mailto:pixartdesignltd@gmail.com)"
 TIMEOUT_S = 30
@@ -91,7 +95,7 @@ def crawl_delay(parser: urllib.robotparser.RobotFileParser) -> str:
     return "non dichiarato (uso 3-5s)"
 
 
-def check(label: str, targets: list[str]) -> str:
+def check(label: str, targets: List[str]) -> str:
     origin = "{0.scheme}://{0.netloc}".format(urllib.parse.urlparse(targets[0]))
     print(f"\n=== {label} ({origin}) ===")
     try:
@@ -117,7 +121,7 @@ def check(label: str, targets: list[str]) -> str:
     return CONSENTITO if all_allowed else NEGATO
 
 
-def targets_from_config(path: pathlib.Path) -> dict[str, list[str]]:
+def targets_from_config(path: pathlib.Path) -> Dict[str, List[str]]:
     """Legge config/chains.yaml se PyYAML e' disponibile, altrimenti None."""
     try:
         import yaml  # type: ignore
@@ -129,7 +133,7 @@ def targets_from_config(path: pathlib.Path) -> dict[str, list[str]]:
         return {}
 
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    out: dict[str, list[str]] = {}
+    out = {}  # type: Dict[str, List[str]]
     for chain in data.get("chains", []):
         urls = [chain["website"]]
         template = (chain.get("discovery") or {}).get("url_template")
