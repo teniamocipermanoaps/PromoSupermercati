@@ -190,6 +190,33 @@ va consegnata a voce, non per email o messaggio. Lo stesso comando reimposta la
 password di un accesso esistente: e' la via di recupero, perche' non c'e' un
 "password dimenticata".
 
+### Senza accesso SSH (pannello Plesk o simili)
+
+Lo script e' da riga di comando, quindi serve un modo di eseguirlo. Su Plesk
+si usa **Strumenti e impostazioni -> Attivita' pianificate**, con "Esegui un
+comando".
+
+La password **non va scritta nella definizione dell'attivita'**: resta li',
+visibile a chiunque apra il pannello, e Plesk puo' spedirne l'esito per email.
+Si passa da un file temporaneo:
+
+1. Con il File Manager, crea un file (per esempio `segreto.txt`) nella cartella
+   del dominio ma **fuori da `httpdocs`**, con dentro la sola password.
+2. Dai al file i permessi **600**. Lo script si rifiuta di leggere un file che
+   altri utenti del server possono aprire.
+3. Crea l'attivita' pianificata, eseguila una volta sola:
+
+   ```
+   UTENTE_PASSWORD_FILE=/var/www/vhosts/<dominio>/segreto.txt \
+     /opt/plesk/php/8.2/bin/php \
+     /var/www/vhosts/<dominio>/osservatoriopromo/ops/scripts/crea_utente.php \
+     maria@esempio.it "Maria Rossi"
+   ```
+
+4. **Cancella il file** e l'attivita'. Lo script te lo ricorda a lavoro finito.
+
+Adattare la versione di PHP nel percorso a quella scelta per il dominio.
+
 Verificare che **non** sia rimasto l'accesso dimostrativo:
 
 ```sql

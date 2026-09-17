@@ -10,6 +10,12 @@
  *
  *   UTENTE_PASSWORD='...' php ops/scripts/crea_utente.php ...
  *
+ * Su un pannello senza accesso SSH (Plesk, Attivita' pianificate) la password
+ * non va scritta nella definizione dell'attivita', perche' resta li'. Si mette
+ * in un file, si esegue, si cancella il file:
+ *
+ *   UTENTE_PASSWORD_FILE=/percorso/segreto.txt php ops/scripts/crea_utente.php ...
+ *
  * Se l'email esiste gia' la password viene reimpostata e l'accesso riattivato:
  * e' la via di recupero, perche' non esiste un "password dimenticata" via email.
  *
@@ -48,18 +54,53 @@ function esci_con_errore(string $messaggio): never
     exit(1);
 }
 
-/** Legge una password senza mostrarla a schermo. */
-function chiedi_password(string $richiesta): string
+function password_non_interattiva(): ?string
 {
     $daAmbiente = getenv('UTENTE_PASSWORD');
     if (is_string($daAmbiente) && $daAmbiente !== '') {
         return $daAmbiente;
     }
 
+    $file = getenv('UTENTE_PASSWORD_FILE');
+    if (!is_string($file) || $file === '') {
+        return null;
+    }
+    if (!is_readable($file)) {
+        esci_con_errore("il file della password non si legge: {$file}");
+    }
+
+    // Un file di password leggibile da tutti sul server e' una password
+    // leggibile da tutti: meglio fermarsi che procedere in silenzio.
+    $permessi = fileperms($file) & 0o077;
+    if ($permessi !== 0) {
+        esci_con_errore(sprintf(
+            "il file %s e' leggibile da altri utenti (permessi %o). "
+            . 'Dagli 600 e riprova.',
+            $file,
+            fileperms($file) & 0o777
+        ));
+    }
+
+    $password = rtrim((string) file_get_contents($file), "\r\n");
+    if ($password === '') {
+        esci_con_errore("il file della password e' vuoto: {$file}");
+    }
+    return $password;
+}
+
+/** Legge una password senza mostrarla a schermo. */
+function chiedi_password(string $richiesta): string
+{
+    $fuoriDalTerminale = password_non_interattiva();
+    if ($fuoriDalTerminale !== null) {
+        return $fuoriDalTerminale;
+    }
+
     if (!stream_isatty(STDIN)) {
         esci_con_errore(
-            'nessun terminale per digitare la password. '
-            . "Usa:  UTENTE_PASSWORD='...' php ops/scripts/crea_utente.php ..."
+            'nessun terminale per digitare la password. Usa una di queste:' . PHP_EOL
+            . "  UTENTE_PASSWORD='...' php ops/scripts/crea_utente.php ..." . PHP_EOL
+            . '  UTENTE_PASSWORD_FILE=/percorso/segreto.txt php ops/scripts/crea_utente.php ...'
         );
     }
 
@@ -100,7 +141,7 @@ if (strlen($password) < LUNGHEZZA_MINIMA) {
 }
 
 // La conferma si chiede solo a chi sta digitando davvero.
-if (getenv('UTENTE_PASSWORD') === false || getenv('UTENTE_PASSWORD') === '') {
+if (password_non_interattiva() === null) {
     if (chiedi_password('Ripeti la password: ') !== $password) {
         esci_con_errore('le due password non coincidono.');
     }
@@ -121,3 +162,7 @@ try {
 }
 
 fwrite(STDOUT, "La password non e' stata scritta da nessuna parte: consegnala a voce.\n");
+
+if (getenv('UTENTE_PASSWORD_FILE')) {
+    fwrite(STDOUT, 'Ora cancella ' . getenv('UTENTE_PASSWORD_FILE') . ": ha finito il suo lavoro.\n");
+}
