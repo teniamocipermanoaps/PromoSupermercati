@@ -14,8 +14,12 @@ Uso:
     python3 ops/scripts/check_robots.py --config config/chains.yaml
     python3 ops/scripts/check_robots.py --url https://www.esempio.it/volantini
 
-Exit code: 0 se tutti i percorsi controllati sono consentiti, 1 altrimenti,
-2 in caso di errore di rete o robots.txt irraggiungibile.
+Exit code: 0 se tutti i percorsi controllati sono consentiti, 1 se almeno un
+robots.txt nega, 2 se almeno un robots.txt non e' stato raggiungibile.
+
+La distinzione fra 1 e 2 conta: 1 e' una risposta del sito, che va annotata in
+chains.legal_notes; 2 significa che non si e' verificato niente, e non va
+scambiato per un divieto. In entrambi i casi non si raccoglie.
 """
 
 from __future__ import annotations
@@ -32,6 +36,13 @@ import urllib.robotparser
 USER_AGENT = "OsservatorioPromoBot/0.1 (+mailto:pixartdesignltd@gmail.com)"
 TIMEOUT_S = 30
 LEGAL_DIR = pathlib.Path("storage/legal")
+
+# I tre esiti possibili. BLOCCATO non e' un divieto del sito: e' l'assenza di
+# una verifica, e si distingue perche' si corregge in modo diverso (una rete
+# che non arriva, non un accordo da chiedere alla catena).
+CONSENTITO = "CONSENTITO"
+NEGATO = "NEGATO"
+BLOCCATO = "BLOCCATO"
 
 # Percorsi indicativi da verificare quando la catena non e' ancora configurata.
 DEFAULT_TARGETS = {
@@ -80,7 +91,7 @@ def crawl_delay(parser: urllib.robotparser.RobotFileParser) -> str:
     return "non dichiarato (uso 3-5s)"
 
 
-def check(label: str, targets: list[str]) -> bool:
+def check(label: str, targets: list[str]) -> str:
     origin = "{0.scheme}://{0.netloc}".format(urllib.parse.urlparse(targets[0]))
     print(f"\n=== {label} ({origin}) ===")
     try:
@@ -88,7 +99,7 @@ def check(label: str, targets: list[str]) -> bool:
     except RuntimeError as exc:
         print(f"  ERRORE: {exc}")
         print("  ESITO: BLOCCATO (impossibile verificare -> non si raccoglie)")
-        return False
+        return BLOCCATO
 
     saved = archive(origin, body)
     parser = urllib.robotparser.RobotFileParser()
@@ -103,7 +114,7 @@ def check(label: str, targets: list[str]) -> bool:
         print(f"  [{'OK     ' if allowed else 'DENIED '}] {url}")
 
     print(f"  ESITO: {'CONSENTITO' if all_allowed else 'NEGATO -> disattivare la catena'}")
-    return all_allowed
+    return CONSENTITO if all_allowed else NEGATO
 
 
 def targets_from_config(path: pathlib.Path) -> dict[str, list[str]]:
@@ -141,16 +152,25 @@ def main() -> int:
         targets.setdefault(host, []).append(url)
 
     print(f"User-Agent: {USER_AGENT}")
-    results = {label: check(label, urls) for label, urls in sorted(targets.items()) if urls}
+    esiti = {label: check(label, urls) for label, urls in sorted(targets.items()) if urls}
 
     print("\n--- RIEPILOGO ---")
-    for label, ok in results.items():
-        print(f"  {label:<14} {'CONSENTITO' if ok else 'NEGATO/BLOCCATO'}")
+    for label, esito in esiti.items():
+        print(f"  {label:<14} {esito}")
     print("\nNota: robots.txt non sostituisce i Termini d'uso. Prima di attivare una")
     print("catena leggi anche le sue condizioni di servizio e annota l'esito in")
     print("chains.legal_notes.")
 
-    return 0 if all(results.values()) else 1
+    # Un robots irraggiungibile ha la precedenza su un divieto: e' un guasto da
+    # riparare prima di poter dire qualcosa sulla catena, non una risposta.
+    if BLOCCATO in esiti.values():
+        print("\nAlmeno una verifica non e' riuscita: nessun esito da annotare per")
+        print("quelle catene, e niente da archiviare in storage/legal/. Ripetere il")
+        print("controllo da una rete che raggiunge i siti.")
+        return 2
+    if NEGATO in esiti.values():
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
