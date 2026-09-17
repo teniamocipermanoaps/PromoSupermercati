@@ -1,0 +1,74 @@
+# Catene monitorate. Aggiungere una catena = una voce qui + un adapter in
+# crawler/src/osservatorio/adapters/. Nessun'altra parte del codice va toccata.
+#
+# IMPORTANTE: enabled resta false finche' il gate legale non e' superato.
+# Eseguire `python3 ops/scripts/check_robots.py` e leggere i Termini d'uso,
+# poi annotare l'esito in legal_notes prima di mettere enabled: true.
+
+defaults:
+  user_agent: "OsservatorioPromoBot/0.1 (+mailto:pixartdesignltd@gmail.com)"
+  respect_robots: true
+  rate_limit:
+    min_delay_s: 3
+    max_delay_s: 5
+  timeout_s: 45
+  max_retries: 3
+  # 'structured' se la catena espone gia' le offerte in forma leggibile:
+  # nessuna rasterizzazione, nessun costo AI, nessun errore di lettura.
+  # 'document' se esiste solo il PDF. Si determina ispezionando il sito.
+  source_kind: document
+
+chains:
+  - slug: conad
+    name: Conad
+    segment: insegna_tradizionale
+    adapter: conad
+    website: "https://www.conad.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    discovery:
+      mode: store_picker        # store_picker | api | sitemap | iframe
+      url_template: null        # da compilare dopo l'ispezione del sito
+      selectors: {}
+    # Tipologie di punto vendita: dimensione di analisi, non dettaglio.
+    banners:
+      - { slug: conad-city,       name: "Conad City",       format: superette }
+      - { slug: conad,            name: "Conad",            format: supermercato }
+      - { slug: conad-superstore, name: "Conad Superstore", format: superstore }
+      - { slug: spazio-conad,     name: "Spazio Conad",     format: ipermercato }
+    stores_filter:
+      provinces: [NA, RM, MI, TO, BA]
+
+  - slug: carrefour
+    name: Carrefour Italia
+    segment: insegna_tradizionale
+    adapter: carrefour
+    website: "https://www.carrefour.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: carrefour-express, name: "Carrefour Express", format: superette }
+      - { slug: carrefour-market,  name: "Carrefour Market",  format: supermercato }
+      - { slug: carrefour-iper,    name: "Carrefour Iper",    format: ipermercato }
+    stores_filter:
+      provinces: [NA, RM, MI, TO, BA]
+
+  - slug: lidl
+    name: Lidl Italia
+    segment: discount
+    adapter: lidl
+    website: "https://www.lidl.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: lidl, name: "Lidl", format: discount }
+    stores_filter:
+      provinces: [NA, RM, MI, TO, BA]

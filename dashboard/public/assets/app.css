@@ -1,0 +1,178 @@
+:root {
+  --sfondo: #f6f7f9;
+  --superficie: #ffffff;
+  --bordo: #dfe3e8;
+  --testo: #1c2126;
+  --testo-tenue: #5d6873;
+  --accento: #1f6f5c;
+  --accento-tenue: #e7f2ef;
+  --alto: #1f6f5c;
+  --medio: #a86a12;
+  --basso: #6b7480;
+  --negativo: #a32b2b;
+  --raggio: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sfondo: #14181c;
+    --superficie: #1c2126;
+    --bordo: #2c343c;
+    --testo: #e8eaed;
+    --testo-tenue: #9aa4af;
+    --accento: #5cbfa4;
+    --accento-tenue: #1d302c;
+    --alto: #5cbfa4;
+    --medio: #d9a441;
+    --basso: #8c96a1;
+    --negativo: #e0736f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--sfondo);
+  color: var(--testo);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+a { color: var(--accento); }
+
+header.barra {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--bordo);
+  padding: 0 16px;
+}
+.barra-interna {
+  max-width: 1180px; margin: 0 auto;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  min-height: 60px;
+}
+.marchio { font-weight: 700; letter-spacing: -0.01em; }
+.marchio span { color: var(--testo-tenue); font-weight: 400; font-size: 13px; display: block; }
+nav.menu { display: flex; gap: 4px; flex-wrap: wrap; }
+nav.menu a {
+  padding: 7px 12px; border-radius: 7px; text-decoration: none;
+  color: var(--testo-tenue); font-weight: 500;
+}
+nav.menu a:hover { background: var(--sfondo); color: var(--testo); }
+nav.menu a.attivo { background: var(--accento-tenue); color: var(--accento); }
+
+main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 64px; }
+
+h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; }
+h2 { font-size: 17px; margin: 0 0 12px; }
+.sottotitolo { color: var(--testo-tenue); margin: 0 0 24px; }
+
+.riquadro {
+  background: var(--superficie); border: 1px solid var(--bordo);
+  border-radius: var(--raggio); padding: 18px; margin-bottom: 20px;
+}
+
+.tessere { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.tessera { background: var(--superficie); border: 1px solid var(--bordo); border-radius: var(--raggio); padding: 14px; }
+.tessera .numero { font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+.tessera .etichetta { color: var(--testo-tenue); font-size: 13px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th {
+  text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--testo-tenue); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--bordo);
+}
+td { padding: 11px 10px; border-bottom: 1px solid var(--bordo); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--sfondo); }
+.numerico { text-align: right; font-variant-numeric: tabular-nums; }
+
+.pill {
+  display: inline-block; padding: 2px 9px; border-radius: 999px;
+  font-size: 12px; font-weight: 600; border: 1px solid var(--bordo);
+  color: var(--testo-tenue); white-space: nowrap;
+}
+.pill.alto { color: var(--alto); border-color: var(--alto); background: var(--accento-tenue); }
+.pill.medio { color: var(--medio); border-color: var(--medio); }
+.pill.basso { color: var(--basso); }
+.pill.negativo { color: var(--negativo); border-color: var(--negativo); }
+
+.giorni { display: flex; flex-direction: column; gap: 3px; }
+.giorno { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.giorno .data { font-weight: 600; min-width: 108px; }
+.giorno .fase { color: var(--testo-tenue); font-size: 12px; }
+.giorno.principale .data { color: var(--accento); }
+
+form.filtri { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+label { display: block; font-size: 12px; color: var(--testo-tenue); margin-bottom: 4px; font-weight: 600; }
+select, input[type=text], input[type=date], input[type=number], textarea {
+  padding: 8px 10px; border: 1px solid var(--bordo); border-radius: 7px;
+  background: var(--superficie); color: var(--testo); font: inherit; font-size: 14px; min-width: 150px;
+}
+textarea { width: 100%; min-height: 64px; resize: vertical; }
+
+button, .bottone {
+  padding: 8px 14px; border-radius: 7px; border: 1px solid transparent;
+  background: var(--accento); color: #fff; font: inherit; font-weight: 600;
+  cursor: pointer; text-decoration: none; display: inline-block;
+}
+button:hover { filter: brightness(1.08); }
+.bottone.tenue, button.tenue {
+  background: transparent; color: var(--testo-tenue); border-color: var(--bordo);
+}
+
+.griglia-due { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.campi { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 12px; }
+.campo-largo { grid-column: 1 / -1; }
+/* Senza questo un menu con voci lunghe sborda sulla colonna accanto. */
+.campi > div { min-width: 0; }
+.campi select, .campi input, .campi textarea { width: 100%; min-width: 0; }
+.campi input[type=checkbox] { width: auto; }
+
+dl.dati { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; font-size: 14px; }
+dl.dati dt { color: var(--testo-tenue); }
+dl.dati dd { margin: 0; }
+
+.avviso {
+  padding: 10px 14px; border-radius: 7px; margin-bottom: 16px;
+  background: var(--accento-tenue); color: var(--accento); font-size: 14px; font-weight: 500;
+}
+.avviso.errore { background: transparent; border: 1px solid var(--negativo); color: var(--negativo); }
+.vuoto { color: var(--testo-tenue); font-style: italic; padding: 18px 0; }
+
+@media (max-width: 760px) {
+  .griglia-due { grid-template-columns: 1fr; }
+  table { font-size: 13px; }
+
+  /* Le tabelle non impilate scorrono dentro la propria scheda,
+     cosi' la pagina non scorre mai in orizzontale. */
+  .riquadro { overflow-x: auto; }
+
+  /* Le tabelle usate dal telefono diventano schede: una riga per scheda,
+     con l'intestazione ripetuta accanto a ogni valore. */
+  table.impilabile,
+  table.impilabile tbody,
+  table.impilabile tr,
+  table.impilabile td { display: block; width: 100%; }
+  table.impilabile thead { display: none; }
+  table.impilabile tr {
+    border: 1px solid var(--bordo); border-radius: var(--raggio);
+    padding: 12px; margin-bottom: 10px;
+  }
+  table.impilabile tr:hover { background: transparent; }
+  table.impilabile td {
+    border: none; padding: 5px 0;
+    display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: start;
+  }
+  table.impilabile td::before {
+    content: attr(data-etichetta);
+    color: var(--testo-tenue); font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em; padding-top: 2px;
+  }
+  table.impilabile td.numerico { text-align: left; }
+}
+
+@media print {
+  header.barra, form.filtri, button, .bottone { display: none; }
+  body { background: #fff; }
+  .riquadro { border: none; padding: 0; }
+}

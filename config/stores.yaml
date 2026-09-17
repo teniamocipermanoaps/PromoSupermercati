@@ -1,0 +1,7 @@
+# Punti vendita monitorati, raggruppati per catena.
+# external_id e' l'identificativo del PDV sul sito della catena: va compilato
+# dopo l'ispezione, perche' ogni catena usa un formato diverso.
+stores:
+  conad: []
+  carrefour: []
+  lidl: []

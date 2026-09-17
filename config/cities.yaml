@@ -1,0 +1,22 @@
+# Citta' dell'MVP. Aggiungere una citta' = una voce qui + i PDV in stores.yaml.
+cities:
+  - name: Napoli
+    province: NA
+    region: Campania
+    postal_codes: ["80100", "80121", "80122", "80125", "80131", "80142"]
+  - name: Roma
+    province: RM
+    region: Lazio
+    postal_codes: ["00100", "00118", "00135", "00154", "00168", "00184"]
+  - name: Milano
+    province: MI
+    region: Lombardia
+    postal_codes: ["20121", "20124", "20131", "20142", "20155"]
+  - name: Torino
+    province: TO
+    region: Piemonte
+    postal_codes: ["10121", "10126", "10134", "10144", "10152"]
+  - name: Bari
+    province: BA
+    region: Puglia
+    postal_codes: ["70121", "70124", "70125", "70126", "70132"]
