@@ -12,9 +12,12 @@
 RewriteEngine On
 RewriteBase /promosupermercati
 
-# Tutto in HTTPS.
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# Niente reindirizzamento a HTTPS qui dentro. Dietro un proxy che termina il
+# TLS (Plesk con nginx davanti ad Apache e' il caso tipico) Apache vede
+# HTTPS=off anche per una richiesta arrivata cifrata: la regola rimanderebbe a
+# HTTPS all'infinito e la dashboard diventerebbe irraggiungibile. Il passaggio
+# a HTTPS si imposta al livello del dominio, dove il pannello ha gia' la sua
+# voce apposta.
 
 # Il router e' scritto a mano: ogni percorso che non e' un file vero deve
 # arrivare a index.php.
@@ -23,7 +26,11 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [L]
 
 <IfModule mod_headers.c>
-  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  # Niente Strict-Transport-Security qui dentro. HSTS non vale per la cartella
+  # ma per l'intero dominio, e con includeSubDomains anche per i sottodomini:
+  # se uno di quelli non ha un certificato valido, i browser smettono di
+  # aprirlo e se lo ricordano per un anno. E' una decisione sul dominio, e va
+  # presa al livello del dominio, non da una sottocartella.
   Header always set X-Content-Type-Options "nosniff"
   Header always set X-Frame-Options "DENY"
   Header always set Referrer-Policy "same-origin"
