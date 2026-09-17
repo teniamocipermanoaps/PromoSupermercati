@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Percorsi;
 use App\Core\View;
 use App\Models\CampaignRepository;
 
@@ -27,11 +28,11 @@ final class CampagneController
         $al = (string) ($_POST['valid_to'] ?? '');
 
         if ($chainId <= 0 || $titolo === '' || $dal === '' || $al === '') {
-            header('Location: /campagne?errore=campi-mancanti');
+            header('Location: ' . Percorsi::a('/campagne') . '?errore=campi-mancanti');
             return;
         }
         if ($al < $dal) {
-            header('Location: /campagne?errore=date-invertite');
+            header('Location: ' . Percorsi::a('/campagne') . '?errore=date-invertite');
             return;
         }
 
@@ -40,10 +41,10 @@ final class CampagneController
         } catch (\PDOException $e) {
             // Violazione della chiave di deduplica: campagna gia' inserita.
             $codice = $e->errorInfo[1] ?? 0;
-            header('Location: /campagne?errore=' . ($codice === 1062 ? 'gia-presente' : 'errore-db'));
+            header('Location: ' . Percorsi::a('/campagne') . '?errore=' . ($codice === 1062 ? 'gia-presente' : 'errore-db'));
             return;
         }
 
-        header('Location: /campagne');
+        header('Location: ' . Percorsi::a('/campagne'));
     }
 }

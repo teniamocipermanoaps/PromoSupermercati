@@ -76,6 +76,8 @@ echo "==> Scrivo .env puntando al database dimostrativo"
   echo "DB_NAME=$DB"
   echo "DB_USER=$APP_UTENTE"
   echo "DB_PASSWORD=$APP_PASSWORD"
+  # La dimostrazione gira alla radice del server locale.
+  echo "APP_BASE_PATH="
 } > .env
 chmod 600 .env   # contiene una password: non deve essere leggibile da tutti
 

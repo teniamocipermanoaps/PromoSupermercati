@@ -9,7 +9,11 @@
 # CSRF venga rifiutata.
 #
 # Le credenziali servono perche' la dashboard e' chiusa: creane una con
-#   php ops/scripts/crea_utente.php prova@esempio.it "Prova" 
+#   php ops/scripts/crea_utente.php prova@esempio.it "Prova"
+#
+# Se la dashboard sta in una sottocartella, il prefisso va messo in BASE e deve
+# corrispondere a APP_BASE_PATH del .env:
+#   BASE=http://127.0.0.1:8080/promosupermercati SMOKE_EMAIL=... dashboard/tests/smoke.sh
 #
 # ATTENZIONE: scrive righe reali nel database a cui la dashboard e' collegata.
 # Eseguire solo contro un'istanza usa e getta, mai in produzione. Per ripulire:

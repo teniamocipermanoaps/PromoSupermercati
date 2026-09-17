@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Percorsi;
+
 use App\Models\OutreachRepository;
 
 final class OutreachController
@@ -41,6 +43,6 @@ final class OutreachController
 
     private static function tornaAllaScheda(int $storeId, string $esito): void
     {
-        header('Location: /punti-vendita/' . $storeId . '?esito=' . $esito);
+        header('Location: ' . Percorsi::a('/punti-vendita/' . $storeId) . '?esito=' . $esito);
     }
 }

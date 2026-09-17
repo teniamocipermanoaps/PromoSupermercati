@@ -63,6 +63,7 @@ negozio) stanno su `stores` e non pongono lo stesso problema.
 | Adapter per catena | bloccati in attesa del gate legale |
 | Dashboard PHP (agenda segretarie) | fatta: agenda, scheda PDV, campagne, banchetti |
 | Autenticazione | fatta: accesso con email e password, ogni pagina protetta |
+| Messa in opera | documentata e verificabile; l'installazione vera resta da fare |
 | Estrattore AI delle offerte | non previsto nell'MVP |
 
 ## Gate legale: si esegue prima di scrivere qualunque adapter
@@ -105,6 +106,23 @@ GRANT SELECT, INSERT, UPDATE ON osservatorio_promo.* TO 'osservatorio'@'127.0.0.
 ```
 
 Richiede MariaDB 10.6+ (colonne generate STORED, indici FULLTEXT su InnoDB).
+
+## Mettere la dashboard online
+
+`docs/messa-in-opera.md` e' il percorso passo passo: database, utente
+applicativo, server web, certificato, accessi delle volontarie. Le
+configurazioni pronte per nginx e Apache stanno in `ops/deploy/`, sia per un
+dominio proprio sia per una sottocartella dentro un sito che esiste gia'.
+
+Finita l'installazione si controlla, non si spera:
+
+```bash
+ops/scripts/verifica_produzione.sh https://gestionaletpmo.it/promosupermercati
+```
+
+Verifica che si entri solo in HTTPS, che nessuna pagina si apra senza accesso,
+che `.env` non sia scaricabile e che il cookie di sessione sia protetto.
+Finche' anche un solo controllo fallisce, l'indirizzo non si da' a nessuno.
 
 ## Accesso alla dashboard
 

@@ -1,0 +1,36 @@
+# OsservatorioPromo in una sottocartella su hosting condiviso.
+# Da copiare come .htaccess dentro la cartella pubblicata, cioe' quella che
+# contiene index.php (dashboard/public).
+#
+# In .env deve esserci:  APP_BASE_PATH=/promosupermercati
+#
+# ATTENZIONE: questo file protegge i percorsi, non i file. Se il clone intero
+# sta dentro la radice web, .env resta scaricabile per altre strade. La cartella
+# pubblicata deve contenere SOLO dashboard/public: sugli hosting che non lo
+# permettono, non installare.
+
+RewriteEngine On
+RewriteBase /promosupermercati
+
+# Tutto in HTTPS.
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Il router e' scritto a mano: ogni percorso che non e' un file vero deve
+# arrivare a index.php.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "same-origin"
+</IfModule>
+
+Options -Indexes
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

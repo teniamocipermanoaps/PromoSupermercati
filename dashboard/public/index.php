@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Core\Auth;
 use App\Core\Config;
 use App\Core\Csrf;
+use App\Core\Percorsi;
 use App\Core\Router;
 use App\Core\View;
 
@@ -25,7 +26,8 @@ Config::carica(dirname($radice) . '/.env');
 
 Auth::avviaSessione();
 
-$percorso = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
+// Percorso interno: senza il prefisso della sottocartella, se ce n'e' uno.
+$percorso = Percorsi::interno($_SERVER['REQUEST_URI'] ?? '/');
 
 // Ogni POST deve portare un token valido: nessuna eccezione.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::verifica($_POST['_csrf'] ?? null)) {
@@ -45,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Csrf::verifica($_POST['_csrf'] ?? 
 const ROTTE_PUBBLICHE = ['/accesso'];
 
 if (!in_array($percorso, ROTTE_PUBBLICHE, true) && !Auth::autenticata()) {
-    header('Location: /accesso?ritorno=' . rawurlencode($percorso));
+    header('Location: ' . Percorsi::a('/accesso') . '?ritorno=' . rawurlencode($percorso));
     return;
 }
 

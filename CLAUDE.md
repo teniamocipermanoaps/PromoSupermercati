@@ -40,8 +40,9 @@ db/          4 migration + seed; 900_demo.sql contiene dati INVENTATI
 crawler/     pacchetto Python: adapter, gate robots, normalizzatore, analisi
 dashboard/   MVC PHP vanilla + PDO, nessun framework
 ops/         check_robots.py (gate legale), demo.sh (avvio dimostrativo),
-             crea_utente.php (accessi alla dashboard)
-docs/        traccia per la sessione con le segretarie
+             crea_utente.php (accessi), verifica_produzione.sh (controllo
+             della messa in opera), deploy/ (configurazioni del server web)
+docs/        traccia per le segretarie e messa in opera
 ```
 
 ## Avvio
@@ -88,6 +89,16 @@ perche' non e' in quell'elenco, non perche' qualcuno si e' ricordato di
 proteggerla. Non spostare il controllo dentro i controller, e non allungare
 l'elenco senza una ragione scritta.
 
+**I percorsi passano tutti da `App\Core\Percorsi`.** La dashboard puo' stare
+alla radice di un dominio o in una sottocartella
+(`gestionaletpmo.it/promosupermercati`), e lo dice `APP_BASE_PATH` nel `.env`.
+Dentro l'applicazione i percorsi restano quelli di sempre (`/campagne`): il
+prefisso si aggiunge solo sul confine, con `Percorsi::a()` quando si scrive un
+indirizzo in una pagina o in un `Location`, e si toglie con
+`Percorsi::interno()` quando ne arriva uno dal browser. Scrivere `href="/..."`
+a mano in una vista rompe l'installazione in sottocartella, e il sintomo e' un
+giro di redirect a vuoto, non un errore leggibile.
+
 **I pesi del punteggio sono un'ipotesi dichiarata, non una misura.** Vanno
 ricalibrati sui dati veri di `stall_events` quando ce ne saranno abbastanza:
 la vista `v_resa_punti_vendita` confronta la raccolta con e senza promozione.
@@ -112,11 +123,15 @@ un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
 | Crawler | contratto adapter, registro, gate robots, rate limiter, normalizzatore |
 | Adapter Conad / Carrefour / Lidl | **non scritti**, in attesa del gate legale |
 | Autenticazione | accesso con email e password, ogni pagina protetta |
+| Messa in opera | `docs/messa-in-opera.md`, configurazioni in `ops/deploy/`, controllo con `verifica_produzione.sh` |
 
 ## Cosa fare per primo
 
-1. **Il gate legale** su Conad, Carrefour e Lidl, che sblocca gli adapter.
-2. **Il riscontro delle segretarie** dopo la sessione (vedi
+1. **Mettere online la dashboard** su `gestionaletpmo.it/promosupermercati`,
+   seguendo `docs/messa-in-opera.md`. Il certificato non e' facoltativo: su
+   HTTP la password della segretaria viaggia in chiaro.
+2. **Il gate legale** su Conad, Carrefour e Lidl, che sblocca gli adapter.
+3. **Il riscontro delle segretarie** dopo la sessione (vedi
    `docs/sessione-segretarie.md`): attesi campi mancanti nella scheda del punto
    vendita e stati della richiesta diversi dai sei ipotizzati.
 

@@ -1,5 +1,6 @@
 <?php
 use App\Core\Csrf;
+use App\Core\Percorsi;
 use App\Core\View;
 
 $messaggiErrore = [
@@ -21,7 +22,7 @@ $messaggiErrore = [
 
 <div class="riquadro">
   <h2>Nuova campagna</h2>
-  <form method="post" action="/campagne">
+  <form method="post" action="<?= Percorsi::base() ?>/campagne">
     <?= Csrf::campo() ?>
     <div class="campi">
       <div>

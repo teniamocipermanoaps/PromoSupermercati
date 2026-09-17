@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\Percorsi;
 use App\Core\View;
 use App\Models\UserRepository;
 
@@ -28,7 +29,7 @@ final class AccessoController
     public function mostra(): void
     {
         if (Auth::autenticata()) {
-            header('Location: /');
+            header('Location: ' . Percorsi::a('/'));
             return;
         }
 
@@ -82,13 +83,13 @@ final class AccessoController
         UserRepository::registraAccesso((int) $utente['id']);
         Auth::accedi($utente);
 
-        header('Location: ' . $ritorno);
+        header('Location: ' . Percorsi::a($ritorno));
     }
 
     public function esci(): void
     {
         Auth::esci();
-        header('Location: /accesso?uscita=1');
+        header('Location: ' . Percorsi::a('/accesso') . '?uscita=1');
     }
 
     private function rendi(?string $errore, string $ritorno): void

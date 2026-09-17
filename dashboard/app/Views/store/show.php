@@ -1,5 +1,6 @@
 <?php
 use App\Core\Csrf;
+use App\Core\Percorsi;
 use App\Core\View;
 
 $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_format((float) $v, 2, ',', '.');
@@ -107,7 +108,7 @@ $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_fo
             <?php endif; ?>
           </td>
           <td>
-            <form method="post" action="/richieste/<?= (int) $r['id'] ?>" style="display:flex;gap:6px;align-items:center">
+            <form method="post" action="<?= Percorsi::base() ?>/richieste/<?= (int) $r['id'] ?>" style="display:flex;gap:6px;align-items:center">
               <?= Csrf::campo() ?>
               <select name="status" aria-label="Nuovo stato">
                 <?php foreach ($stati as $s): ?>
@@ -125,7 +126,7 @@ $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_fo
   <?php endif; ?>
 
   <h2 style="margin-top:24px">Nuova richiesta</h2>
-  <form method="post" action="/richieste">
+  <form method="post" action="<?= Percorsi::base() ?>/richieste">
     <?= Csrf::campo() ?>
     <input type="hidden" name="store_id" value="<?= (int) $punto['id'] ?>">
     <div class="campi">

@@ -1,4 +1,5 @@
 <?php
+use App\Core\Percorsi;
 use App\Core\View;
 
 $classeStato = static fn (string $stato): string => match ($stato) {
@@ -34,7 +35,7 @@ $classeStato = static fn (string $stato): string => match ($stato) {
       <?php foreach ($daRichiamare as $r): ?>
         <tr>
           <td data-etichetta="Quando"><strong><?= View::e(date('d/m', strtotime((string) $r['next_follow_up']))) ?></strong></td>
-          <td data-etichetta="Negozio"><a href="/punti-vendita/<?= (int) $r['store_id'] ?>"><?= View::e($r['punto_vendita']) ?></a></td>
+          <td data-etichetta="Negozio"><a href="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $r['store_id'] ?>"><?= View::e($r['punto_vendita']) ?></a></td>
           <td data-etichetta="Città"><?= View::e($r['city']) ?></td>
           <td data-etichetta="Telefono"><?php $numero = $r['phone']; require dirname(__DIR__) . '/partials/telefono.php'; ?></td>
           <td data-etichetta="In carico a"><?= View::e($r['requested_by']) ?></td>
@@ -46,7 +47,7 @@ $classeStato = static fn (string $stato): string => match ($stato) {
 <?php endif; ?>
 
 <div class="riquadro">
-  <form class="filtri" method="get" action="/">
+  <form class="filtri" method="get" action="<?= Percorsi::base() ?>/">
     <?php foreach (['citta' => 'Città', 'catena' => 'Insegna', 'tipologia' => 'Tipologia', 'stato' => 'Stato'] as $nome => $etichetta): ?>
       <div>
         <label for="f-<?= View::e($nome) ?>"><?= View::e($etichetta) ?></label>
@@ -61,7 +62,7 @@ $classeStato = static fn (string $stato): string => match ($stato) {
       </div>
     <?php endforeach; ?>
     <button type="submit">Filtra</button>
-    <a class="bottone tenue" href="/">Azzera</a>
+    <a class="bottone tenue" href="<?= Percorsi::base() ?>/">Azzera</a>
   </form>
 </div>
 
@@ -81,7 +82,7 @@ $classeStato = static fn (string $stato): string => match ($stato) {
       <?php foreach ($righe as $riga): ?>
         <tr>
           <td data-etichetta="Negozio">
-            <a href="/punti-vendita/<?= (int) $riga['store_id'] ?>"><strong><?= View::e($riga['punto_vendita']) ?></strong></a><br>
+            <a href="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $riga['store_id'] ?>"><strong><?= View::e($riga['punto_vendita']) ?></strong></a><br>
             <span class="pill"><?= View::e($riga['tipologia']) ?></span>
             <span style="color:var(--testo-tenue);font-size:13px"><?= View::e($riga['city']) ?></span>
           </td>

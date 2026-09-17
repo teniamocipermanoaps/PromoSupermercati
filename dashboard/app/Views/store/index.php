@@ -1,4 +1,5 @@
-<?php use App\Core\View; ?>
+<?php use App\Core\Percorsi;
+use App\Core\View; ?>
 <h1>Punti vendita</h1>
 <p class="sottotitolo"><?= count($punti) ?> negozi monitorati.</p>
 <div class="riquadro">
@@ -7,7 +8,7 @@
     <tbody>
     <?php foreach ($punti as $p): ?>
       <tr>
-        <td><a href="/punti-vendita/<?= (int) $p['id'] ?>"><?= View::e($p['name']) ?></a></td>
+        <td><a href="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $p['id'] ?>"><?= View::e($p['name']) ?></a></td>
         <td><?= View::e($p['insegna']) ?></td>
         <td><span class="pill"><?= View::e($p['tipologia']) ?></span></td>
         <td><?= View::e($p['city']) ?></td>

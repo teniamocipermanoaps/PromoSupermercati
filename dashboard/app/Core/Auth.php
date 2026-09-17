@@ -37,7 +37,10 @@ final class Auth
 
         session_set_cookie_params([
             'lifetime' => 0,
-            'path' => '/',
+            // Limitato alla sottocartella: in una sottocartella un cookie con
+            // path '/' verrebbe inviato a ogni altra applicazione dello stesso
+            // dominio, e quelle potrebbero sovrascriverlo.
+            'path' => Percorsi::a('/'),
             'httponly' => true,
             'samesite' => 'Lax',
             'secure' => self::connessioneCifrata(),

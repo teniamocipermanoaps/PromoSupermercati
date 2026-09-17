@@ -1,6 +1,7 @@
 <?php
 
 use App\Core\Csrf;
+use App\Core\Percorsi;
 use App\Core\View;
 
 $messaggiErrore = [
@@ -25,7 +26,7 @@ $messaggiErrore = [
   <?php endif; ?>
 
   <div class="riquadro">
-    <form method="post" action="/accesso">
+    <form method="post" action="<?= Percorsi::base() ?>/accesso">
       <?= Csrf::campo() ?>
       <input type="hidden" name="ritorno" value="<?= View::e($ritorno ?? '/') ?>">
       <div>
