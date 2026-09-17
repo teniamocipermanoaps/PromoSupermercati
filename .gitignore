@@ -1,0 +1,13 @@
+# Segreti: le credenziali stanno solo in variabili d'ambiente.
+# Il modello dei campi, senza valori, e' in .env.example.
+.env
+
+# Artefatti Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Il database non va mai committato.
+*.sql.gz
+*.dump
