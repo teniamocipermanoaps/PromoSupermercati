@@ -112,10 +112,21 @@ if [ "$entrata" != "302" ]; then
   exit 1
 fi
 
+# Un'installazione appena fatta non ha punti vendita: i dati di
+# db/seeds/900_demo.sql sono inventati e in produzione non si caricano. Le
+# prove che ne hanno bisogno si adattano invece di fallire, altrimenti la prima
+# verifica su un'installazione sana segnala guasti che non ci sono.
+PDV=$(curl -s -b "$COOKIE" -c "$COOKIE" "$BASE/punti-vendita" \
+  | grep -o 'punti-vendita/[0-9]\+' | head -1 | cut -d/ -f2)
+
 echo "== pagine =="
 controlla "agenda"            200 "$(stato /)"
 controlla "punti vendita"     200 "$(stato /punti-vendita)"
-controlla "scheda punto vendita" 200 "$(stato /punti-vendita/1)"
+if [ -n "$PDV" ]; then
+  controlla "scheda punto vendita" 200 "$(stato /punti-vendita/$PDV)"
+else
+  printf '  --   scheda punto vendita: saltata, nessun punto vendita in archivio\n'
+fi
 controlla "campagne"          200 "$(stato /banchetti)"
 controlla "banchetti"         200 "$(stato /campagne)"
 controlla "404 su rotta ignota" 404 "$(stato /non-esiste)"
@@ -147,28 +158,33 @@ case "$date_invertite" in
   *) printf '  FAIL date invertite accettate (%s)\n' "$date_invertite"; FALLITI=$((FALLITI+1)) ;;
 esac
 
+if [ -z "$PDV" ]; then
+  echo "== richiesta di autorizzazione e banchetto: saltati =="
+  printf '  --   nessun punto vendita in archivio: aggiungine uno e riprova\n'
+else
 echo "== richiesta di autorizzazione =="
-TOKEN=$(token_di /punti-vendita/1)
+TOKEN=$(token_di /punti-vendita/$PDV)
 NOTA="Richiesta di prova $(date +%s)"
 richiesta=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \
-  --data-urlencode "_csrf=$TOKEN" --data-urlencode "store_id=1" \
+  --data-urlencode "_csrf=$TOKEN" --data-urlencode "store_id=$PDV" \
   --data-urlencode "target_date_from=2026-11-05" --data-urlencode "target_date_to=2026-11-18" \
   --data-urlencode "requested_by=Test" --data-urlencode "channel=telefono" \
   --data-urlencode "notes=$NOTA" "$BASE/richieste")
 controlla "POST richiesta reindirizza" 302 "$richiesta"
-contiene "richiesta visibile nella scheda" /punti-vendita/1 "$NOTA"
+contiene "richiesta visibile nella scheda" /punti-vendita/$PDV "$NOTA"
 
 echo "== banchetto =="
 TOKEN=$(token_di /banchetti)
 NOTA_B="Banchetto di prova $(date +%s)"
 banchetto=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \
-  --data-urlencode "_csrf=$TOKEN" --data-urlencode "store_id=1" \
+  --data-urlencode "_csrf=$TOKEN" --data-urlencode "store_id=$PDV" \
   --data-urlencode "event_date=2026-11-07" --data-urlencode "volunteers_count=3" \
   --data-urlencode "donations_eur=250,50" --data-urlencode "promo_active=1" \
   --data-urlencode "footfall_rating=4" --data-urlencode "notes=$NOTA_B" "$BASE/banchetti")
 controlla "POST banchetto reindirizza" 302 "$banchetto"
 contiene "banchetto visibile in elenco" /banchetti "$NOTA_B"
 contiene "importo con decimali corretto" /banchetti "250,50"
+fi
 
 # La revoca non si vede da fuori: senza questa prova, il giorno in cui il
 # controllo sul database sparisse dal cancello nessuno se ne accorgerebbe, e
@@ -192,8 +208,8 @@ if [ -n "${SMOKE_DB:-}" ] && command -v mariadb >/dev/null 2>&1; then
   mariadb "$SMOKE_DB" -e "UPDATE users SET is_active = 0 WHERE email = '$EMAIL';"
   chiusa=$(curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -w '%{http_code}' "$BASE/")
   controlla "sessione gia' aperta chiusa dalla revoca" 302 "$chiusa"
-  scheda=$(curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -w '%{http_code}' "$BASE/punti-vendita/1")
-  controlla "e i dati dei referenti non si leggono piu'" 302 "$scheda"
+  scheda=$(curl -s -b "$REVOCA" -c "$REVOCA" -o /dev/null -w '%{http_code}' "$BASE/punti-vendita")
+  controlla "e l'elenco dei punti vendita non si legge piu'" 302 "$scheda"
 
   mariadb "$SMOKE_DB" -e "UPDATE users SET is_active = 1 WHERE email = '$EMAIL';"
   rm -f "$REVOCA"
