@@ -1,5 +1,7 @@
 <?php
 
+use App\Core\Auth;
+use App\Core\Csrf;
 use App\Core\View;
 
 $percorsoCorrente = rtrim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/', '/') ?: '/';
@@ -9,6 +11,9 @@ $voci = [
     '/campagne' => 'Campagne',
     '/banchetti' => 'Banchetti',
 ];
+
+// Sulla pagina di accesso non c'e' niente da navigare.
+$utenteCollegato = Auth::utente();
 ?>
 <!DOCTYPE html>
 <html lang="it">
@@ -22,12 +27,22 @@ $voci = [
 <header class="barra">
   <div class="barra-interna">
     <div class="marchio">OsservatorioPromo<span>Teniamoci per Mano APS</span></div>
-    <nav class="menu">
-      <?php foreach ($voci as $percorso => $etichetta): ?>
-        <a href="<?= View::e($percorso) ?>"
-           class="<?= $percorsoCorrente === $percorso ? 'attivo' : '' ?>"><?= View::e($etichetta) ?></a>
-      <?php endforeach; ?>
-    </nav>
+    <?php if ($utenteCollegato !== null): ?>
+      <nav class="menu">
+        <?php foreach ($voci as $percorso => $etichetta): ?>
+          <a href="<?= View::e($percorso) ?>"
+             class="<?= $percorsoCorrente === $percorso ? 'attivo' : '' ?>"><?= View::e($etichetta) ?></a>
+        <?php endforeach; ?>
+      </nav>
+      <div class="utente">
+        <span class="nome"><?= View::e($utenteCollegato['nome']) ?></span>
+        <!-- POST, cosi' l'uscita non parte da un'immagine messa in una pagina altrui. -->
+        <form method="post" action="/esci">
+          <?= Csrf::campo() ?>
+          <button type="submit" class="tenue">Esci</button>
+        </form>
+      </div>
+    <?php endif; ?>
   </div>
 </header>
 <main>

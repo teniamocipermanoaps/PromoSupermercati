@@ -62,6 +62,7 @@ negozio) stanno su `stores` e non pongono lo stesso problema.
 | Normalizzatore prezzi | fatto, ora fuori dalla strada critica |
 | Adapter per catena | bloccati in attesa del gate legale |
 | Dashboard PHP (agenda segretarie) | fatta: agenda, scheda PDV, campagne, banchetti |
+| Autenticazione | fatta: accesso con email e password, ogni pagina protetta |
 | Estrattore AI delle offerte | non previsto nell'MVP |
 
 ## Gate legale: si esegue prima di scrivere qualunque adapter
@@ -92,9 +93,49 @@ mysql -u root -p osservatorio_promo < db/seeds/001_chains.sql
 mysql -u root -p osservatorio_promo < db/seeds/002_categories.sql
 mysql -u root -p osservatorio_promo < db/migrations/003_banchetti.sql
 mysql -u root -p osservatorio_promo < db/seeds/003_banners.sql
+mysql -u root -p osservatorio_promo < db/migrations/004_utenti.sql
+```
+
+L'utente con cui si collega la dashboard deve avere **solo SELECT, INSERT,
+UPDATE**: non deve poter modificare lo schema ne' cancellare righe.
+
+```sql
+CREATE USER 'osservatorio'@'127.0.0.1' IDENTIFIED BY '...';
+GRANT SELECT, INSERT, UPDATE ON osservatorio_promo.* TO 'osservatorio'@'127.0.0.1';
 ```
 
 Richiede MariaDB 10.6+ (colonne generate STORED, indici FULLTEXT su InnoDB).
+
+## Accesso alla dashboard
+
+Ogni pagina richiede l'accesso, tranne quella di accesso stessa: la dashboard
+mostra i recapiti dei referenti dei punti vendita, che sono dati personali.
+
+Gli accessi si creano da riga di comando. Non esistono utenti predefiniti nei
+seed, di proposito: l'hash di una password nota dentro un file versionato e'
+una password nota in produzione.
+
+```bash
+php ops/scripts/crea_utente.php maria@esempio.it "Maria Rossi"
+php ops/scripts/crea_utente.php anna@esempio.it "Anna Bianchi" amministratrice
+```
+
+La password si digita a schermo spento e non viene scritta da nessuna parte:
+va consegnata a voce. Lo stesso comando su un'email gia' esistente reimposta la
+password, riattiva l'accesso e toglie l'eventuale blocco: e' la via di
+recupero, perche' non c'e' un "password dimenticata" via email.
+
+Un accesso si revoca senza cancellarlo, perche' l'utente applicativo non ha il
+permesso di cancellare righe:
+
+```sql
+UPDATE users SET is_active = 0 WHERE email = 'maria@esempio.it';
+```
+
+Dopo **5 tentativi falliti consecutivi** l'accesso si blocca per **15 minuti**.
+La sessione decade dopo **8 ore di inattivita'**. Il ruolo (`segretaria` o
+`amministratrice`) e' registrato ma non ancora applicato: oggi ogni utente
+attivo vede tutto.
 
 ## Configurazione
 

@@ -36,19 +36,23 @@ schema ma **non vengono popolate**. Non rianimarle senza che qualcuno lo chieda.
 
 ```
 config/      catene, citta', punti vendita, impostazioni (YAML)
-db/          3 migration + seed; 900_demo.sql contiene dati INVENTATI
+db/          4 migration + seed; 900_demo.sql contiene dati INVENTATI
 crawler/     pacchetto Python: adapter, gate robots, normalizzatore, analisi
 dashboard/   MVC PHP vanilla + PDO, nessun framework
-ops/         check_robots.py (gate legale) e demo.sh (avvio dimostrativo)
+ops/         check_robots.py (gate legale), demo.sh (avvio dimostrativo),
+             crea_utente.php (accessi alla dashboard)
 docs/        traccia per la sessione con le segretarie
 ```
 
 ## Avvio
 
 ```bash
-ops/scripts/demo.sh                       # database + dati finti + server
+ops/scripts/demo.sh                       # database + dati finti + accesso + server
 cd crawler && python3 -m pytest -q        # 63 test
-dashboard/tests/smoke.sh                  # prova end-to-end (scrive righe vere)
+
+# La dashboard e' chiusa: smoke.sh ha bisogno di credenziali valide.
+# demo.sh ne stampa una coppia usa e getta a ogni avvio.
+SMOKE_EMAIL=... SMOKE_PASSWORD=... dashboard/tests/smoke.sh
 ```
 
 Richiede MariaDB 10.6+ (colonne generate STORED, FULLTEXT su InnoDB) e PHP 8.2+
@@ -77,6 +81,13 @@ con `pdo_mysql`.
 Attenzione all'arrotondamento: Python arrotonda al pari, PHP per eccesso, per
 questo il codice Python usa `decimal` con `ROUND_HALF_UP`.
 
+**Il cancello dell'autenticazione e' chiuso per definizione.** L'elenco
+`ROTTE_PUBBLICHE` in `dashboard/public/index.php` ha una sola voce, `/accesso`,
+e il controllo sta li' dentro, prima del router: una rotta nuova nasce protetta
+perche' non e' in quell'elenco, non perche' qualcuno si e' ricordato di
+proteggerla. Non spostare il controllo dentro i controller, e non allungare
+l'elenco senza una ragione scritta.
+
 **I pesi del punteggio sono un'ipotesi dichiarata, non una misura.** Vanno
 ricalibrati sui dati veri di `stall_events` quando ce ne saranno abbastanza:
 la vista `v_resa_punti_vendita` confronta la raccolta con e senza promozione.
@@ -96,19 +107,16 @@ un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
 
 | | |
 |---|---|
-| Schema DB | migration 001-003 applicate e verificate su MariaDB 10.11 |
-| Dashboard | 4 pagine funzionanti, usabile da telefono |
+| Schema DB | migration 001-004 applicate e verificate su MariaDB 10.11 |
+| Dashboard | 4 pagine piu' l'accesso, usabile da telefono |
 | Crawler | contratto adapter, registro, gate robots, rate limiter, normalizzatore |
 | Adapter Conad / Carrefour / Lidl | **non scritti**, in attesa del gate legale |
-| Autenticazione | **assente** |
+| Autenticazione | accesso con email e password, ogni pagina protetta |
 
 ## Cosa fare per primo
 
-1. **L'autenticazione.** Oggi chiunque raggiunga l'indirizzo legge nomi e
-   telefoni dei referenti e puo' scrivere record. E' il blocco piu' serio:
-   la dashboard non puo' uscire da un computer solo finche' non c'e'.
-2. **Il gate legale** su Conad, Carrefour e Lidl, che sblocca gli adapter.
-3. **Il riscontro delle segretarie** dopo la sessione (vedi
+1. **Il gate legale** su Conad, Carrefour e Lidl, che sblocca gli adapter.
+2. **Il riscontro delle segretarie** dopo la sessione (vedi
    `docs/sessione-segretarie.md`): attesi campi mancanti nella scheda del punto
    vendita e stati della richiesta diversi dai sei ipotizzati.
 
@@ -118,3 +126,7 @@ I referenti in `store_contacts` sono dati personali: raccogliere il minimo che
 serve a gestire il rapporto con il punto vendita e cancellarli quando il
 rapporto si chiude. I recapiti generali di filiale stanno su `stores` e non
 pongono lo stesso problema. Il database non va mai committato.
+
+Anche le volontarie in `users` sono dati personali: li' sta solo il minimo per
+far entrare una persona e chiamarla per nome, nessun recapito. Un accesso che
+non serve piu' si mette a `is_active = 0`.

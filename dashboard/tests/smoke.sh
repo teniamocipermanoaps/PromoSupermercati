@@ -2,10 +2,14 @@
 # Prova end-to-end della dashboard su un'istanza gia' avviata.
 #
 #   php -S 127.0.0.1:8080 -t dashboard/public &
-#   dashboard/tests/smoke.sh
+#   SMOKE_EMAIL=... SMOKE_PASSWORD=... dashboard/tests/smoke.sh
 #
-# Verifica che ogni pagina risponda, che i moduli salvino davvero e che una
-# POST senza token CSRF venga rifiutata.
+# Verifica che senza accesso non si veda niente, che l'accesso funzioni, che
+# ogni pagina risponda, che i moduli salvino davvero e che una POST senza token
+# CSRF venga rifiutata.
+#
+# Le credenziali servono perche' la dashboard e' chiusa: creane una con
+#   php ops/scripts/crea_utente.php prova@esempio.it "Prova" 
 #
 # ATTENZIONE: scrive righe reali nel database a cui la dashboard e' collegata.
 # Eseguire solo contro un'istanza usa e getta, mai in produzione. Per ripulire:
@@ -16,6 +20,15 @@ set -uo pipefail
 BASE="${BASE:-http://127.0.0.1:8080}"
 COOKIE=$(mktemp)
 FALLITI=0
+
+EMAIL="${SMOKE_EMAIL:-}"
+PASSWORD="${SMOKE_PASSWORD:-}"
+if [ -z "$EMAIL" ] || [ -z "$PASSWORD" ]; then
+  echo "Servono le credenziali di un accesso esistente:" >&2
+  echo "  SMOKE_EMAIL=... SMOKE_PASSWORD=... $0" >&2
+  echo "Per crearne uno:  php ops/scripts/crea_utente.php prova@esempio.it \"Prova\"" >&2
+  exit 2
+fi
 
 trap 'rm -f "$COOKIE"' EXIT
 
@@ -45,6 +58,44 @@ contiene() {
     FALLITI=$((FALLITI + 1))
   fi
 }
+
+echo "== senza accesso non si entra =="
+# Il cancello e' chiuso per definizione: se una di queste risponde 200,
+# i nomi e i telefoni dei referenti sono di nuovo leggibili da chiunque.
+controlla "agenda chiusa"             302 "$(stato /)"
+controlla "punti vendita chiusi"      302 "$(stato /punti-vendita)"
+controlla "scheda PDV chiusa"         302 "$(stato /punti-vendita/1)"
+controlla "campagne chiuse"           302 "$(stato /campagne)"
+controlla "banchetti chiusi"          302 "$(stato /banchetti)"
+controlla "pagina di accesso aperta"  200 "$(stato /accesso)"
+
+# Un token CSRF valido si prende dalla pagina di accesso: da solo non deve
+# bastare a scrivere niente.
+TOKEN=$(token_di /accesso)
+scrittura_anonima=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{redirect_url}' -X POST \
+  --data-urlencode "_csrf=$TOKEN" --data-urlencode "chain_id=1" --data-urlencode "title=Intrusione" \
+  --data-urlencode "valid_from=2026-11-01" --data-urlencode "valid_to=2026-11-07" "$BASE/campagne")
+case "$scrittura_anonima" in
+  */accesso*) printf '  OK   POST senza accesso respinta verso la pagina di accesso\n' ;;
+  *) printf '  FAIL POST senza accesso accettata (%s)\n' "$scrittura_anonima"; FALLITI=$((FALLITI+1)) ;;
+esac
+
+echo "== accesso =="
+TOKEN=$(token_di /accesso)
+sbagliata=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \
+  --data-urlencode "_csrf=$TOKEN" --data-urlencode "email=$EMAIL" \
+  --data-urlencode "password=password-sbagliata-di-proposito" "$BASE/accesso")
+controlla "password sbagliata rifiutata" 401 "$sbagliata"
+
+TOKEN=$(token_di /accesso)
+entrata=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \
+  --data-urlencode "_csrf=$TOKEN" --data-urlencode "email=$EMAIL" \
+  --data-urlencode "password=$PASSWORD" "$BASE/accesso")
+controlla "accesso riuscito" 302 "$entrata"
+if [ "$entrata" != "302" ]; then
+  echo "Accesso non riuscito: le prove seguenti non hanno senso. Controlla le credenziali." >&2
+  exit 1
+fi
 
 echo "== pagine =="
 controlla "agenda"            200 "$(stato /)"
@@ -103,6 +154,13 @@ banchetto=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X 
 controlla "POST banchetto reindirizza" 302 "$banchetto"
 contiene "banchetto visibile in elenco" /banchetti "$NOTA_B"
 contiene "importo con decimali corretto" /banchetti "250,50"
+
+echo "== uscita =="
+TOKEN=$(token_di /)
+uscita=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \
+  --data-urlencode "_csrf=$TOKEN" "$BASE/esci")
+controlla "POST uscita reindirizza" 302 "$uscita"
+controlla "dopo l'uscita l'agenda e' di nuovo chiusa" 302 "$(stato /)"
 
 echo
 if [ "$FALLITI" -eq 0 ]; then

@@ -176,3 +176,17 @@ dl.dati dd { margin: 0; }
   body { background: #fff; }
   .riquadro { border: none; padding: 0; }
 }
+
+/* Accesso ------------------------------------------------------------- */
+
+/* Il nome di chi sta lavorando e il bottone per uscire, in fondo alla barra. */
+.utente { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.utente .nome { color: var(--testo-tenue); font-size: 13px; font-weight: 600; }
+.utente form { margin: 0; }
+
+/* La pagina di accesso e' stretta: un solo compito, nessuna distrazione. */
+.accesso { max-width: 380px; margin: 40px auto 0; }
+.accesso .riquadro { padding: 20px; }
+.accesso button { width: 100%; }
+.nota-accesso { color: var(--testo-tenue); font-size: 13px; margin-top: 16px; }
+.nota-accesso code { font-size: 12px; word-break: break-all; }
