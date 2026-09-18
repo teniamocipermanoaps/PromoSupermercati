@@ -26,6 +26,7 @@ import json
 import pathlib
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -56,6 +57,19 @@ def carica_yaml(percorso: pathlib.Path):
     return yaml.safe_load(percorso.read_text(encoding="utf-8"))
 
 
+def normalizza(testo: str) -> str:
+    """Minuscolo e senza accenti.
+
+    Su OpenStreetMap la stessa insegna compare come "Deco" e come "Decò", e
+    confrontando le stringhe cosi' come sono i negozi accentati restano senza
+    tipologia. Non e' un dettaglio estetico: le viste trattano una tipologia
+    mancante come 'supermercato', quindi un superstore finirebbe contato fra i
+    supermercati senza che nessuno se ne accorga.
+    """
+    scomposto = unicodedata.normalize("NFKD", testo.lower())
+    return "".join(c for c in scomposto if not unicodedata.combining(c))
+
+
 def indice_marchi(catene: List[dict]) -> List[Tuple[str, str, str]]:
     """Da nome di marchio a (slug catena, slug tipologia, nome marchio).
 
@@ -68,19 +82,20 @@ def indice_marchi(catene: List[dict]) -> List[Tuple[str, str, str]]:
         tipologie = catena.get("banners") or []
         for marchio in catena.get("osm_brands") or []:
             tipologia = scegli_tipologia(marchio, tipologie)
-            voci.append((marchio.lower(), catena["slug"], tipologia))
+            voci.append((normalizza(marchio), catena["slug"], tipologia))
     voci.sort(key=lambda v: len(v[0]), reverse=True)
     return voci
 
 
 def scegli_tipologia(marchio: str, tipologie: List[dict]) -> Optional[str]:
     """La tipologia il cui nome corrisponde meglio al marchio."""
+    cercato = normalizza(marchio)
     migliore = None
     for tipologia in tipologie:
-        nome = tipologia["name"].lower()
-        if nome == marchio.lower():
+        nome = normalizza(tipologia["name"])
+        if nome == cercato:
             return tipologia["slug"]
-        if nome in marchio.lower() and (migliore is None or len(nome) > len(migliore[0])):
+        if nome in cercato and (migliore is None or len(nome) > len(migliore[0])):
             migliore = (nome, tipologia["slug"])
     return migliore[1] if migliore else None
 
@@ -97,7 +112,7 @@ def riconosci(etichette: dict, marchi: List[Tuple[str, str, str]]):
     candidati = [
         etichette.get("brand"), etichette.get("name"), etichette.get("operator"),
     ]
-    candidati = [c.lower() for c in candidati if c]
+    candidati = [normalizza(c) for c in candidati if c]
 
     for marchio, catena, tipologia in marchi:
         for candidato in candidati:
@@ -148,6 +163,7 @@ def negozi(dati: dict, citta: dict, marchi: List[Tuple[str, str, str]]) -> List[
             "external_id": "osm:{0}/{1}".format(elemento.get("type"), elemento.get("id")),
             "catena": catena,
             "tipologia": tipologia,
+            "marchio_osm": etichette.get("brand") or etichette.get("name") or "",
             "name": etichette.get("name") or etichette.get("brand") or "senza nome",
             "address": indirizzo(etichette),
             "postal_code": (etichette.get("addr:postcode") or "")[:5] or None,
@@ -244,6 +260,7 @@ def main() -> int:
     print()
 
     totale = 0
+    senza_tipologia = {}  # type: Dict[str, int]
     for indice, c in enumerate(scelte):
         try:
             if args.da_file:
@@ -258,6 +275,10 @@ def main() -> int:
 
         trovati = negozi(dati, c, marchi)
         totale += len(trovati)
+        for negozio in trovati:
+            if not negozio["tipologia"]:
+                chiave = "{0} / {1}".format(negozio["catena"], negozio["marchio_osm"])
+                senza_tipologia[chiave] = senza_tipologia.get(chiave, 0) + 1
         sys.stderr.write("{0:<28} {1:>4} negozi\n".format(c["name"], len(trovati)))
         if trovati:
             print("-- {0} ({1})".format(c["name"], c["province"]))
@@ -266,6 +287,17 @@ def main() -> int:
             print()
 
     sys.stderr.write("\nTotale: {0} negozi in {1} citta'.\n".format(totale, len(scelte)))
+
+    if senza_tipologia:
+        sys.stderr.write(
+            "\n{0} negozi senza tipologia. Non e' innocuo: le viste li contano\n"
+            "come supermercati, quindi un superstore o un discount finirebbe nel\n"
+            "mucchio sbagliato. Aggiungi la tipologia mancante in config/chains.yaml:\n"
+            .format(sum(senza_tipologia.values()))
+        )
+        for marchio in sorted(senza_tipologia, key=lambda m: -senza_tipologia[m]):
+            sys.stderr.write("  {0:>4}  {1}\n".format(senza_tipologia[marchio], marchio))
+
     sys.stderr.write("Rileggi il file prima di applicarlo, poi:\n")
     sys.stderr.write("  mariadb <database> < negozi.sql\n")
     return 0

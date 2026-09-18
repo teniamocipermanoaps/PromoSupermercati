@@ -60,6 +60,12 @@ chains:
       url_template: null
       selectors: {}
     banners:
+      # Un negozio marchiato solo "Carrefour" in OSM: quasi sempre un Market.
+      # E' un'ipotesi dichiarata, non un dato. Lasciarlo senza tipologia non
+      # sarebbe piu' prudente: le viste fanno COALESCE(format,'supermercato'),
+      # quindi finirebbe supermercato lo stesso ma in silenzio, e senza che
+      # nessuno possa correggerlo dalla scheda del punto vendita.
+      - { slug: carrefour,          name: "Carrefour", format: supermercato }
       - { slug: carrefour-express,  name: "Carrefour Express", format: superette }
       - { slug: carrefour-market,   name: "Carrefour Market", format: supermercato }
       - { slug: carrefour-iper,     name: "Carrefour Iper", format: ipermercato }
@@ -96,8 +102,8 @@ chains:
       url_template: null
       selectors: {}
     banners:
-      - { slug: deco,       name: "Deco", format: supermercato }
-      - { slug: deco-maxi,  name: "Deco Maxi", format: superstore }
+      - { slug: deco,       name: "Decò", format: supermercato }
+      - { slug: deco-maxi,  name: "Decò Maxi", format: superstore }
 
   - slug: coop
     name: Coop
@@ -187,7 +193,7 @@ chains:
       url_template: null
       selectors: {}
     banners:
-      - { slug: penny,  name: "Penny Market", format: discount }
+      - { slug: penny,  name: "Penny", format: discount }
 
   - slug: despar
     name: Despar Italia
