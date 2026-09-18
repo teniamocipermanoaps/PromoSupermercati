@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Percorsi;
 use App\Core\View;
 use App\Models\OutreachRepository;
 use App\Models\StoreRepository;
@@ -14,10 +15,67 @@ final class StoreController
 {
     public function elenco(): void
     {
+        $filtri = [
+            'provincia' => trim((string) ($_GET['provincia'] ?? '')),
+            'citta' => trim((string) ($_GET['citta'] ?? '')),
+            'catena' => trim((string) ($_GET['catena'] ?? '')),
+            'tipologia' => trim((string) ($_GET['tipologia'] ?? '')),
+            'cerca' => trim((string) ($_GET['cerca'] ?? '')),
+        ];
+
+        $punti = StoreRepository::elenco($filtri);
+        $totale = StoreRepository::conta($filtri);
+
         View::rendi('store/index', [
             'titoloPagina' => 'Punti vendita',
-            'punti' => StoreRepository::elenco(),
+            'punti' => $punti,
+            'totale' => $totale,
+            'limite' => StoreRepository::LIMITE_ELENCO,
+            'filtri' => $filtri,
+            'valoriFiltri' => StoreRepository::valoriFiltri(),
+            'esito' => $_GET['esito'] ?? null,
         ]);
+    }
+
+    /** Salva i campi della scheda che curano le segretarie. */
+    public function aggiorna(int $id): void
+    {
+        if (StoreRepository::trova($id) === null) {
+            http_response_code(404);
+            View::rendi('errore', [
+                'titoloPagina' => 'Non trovato',
+                'titolo' => 'Punto vendita non trovato',
+                'messaggio' => 'Nessun punto vendita con identificativo ' . $id . '.',
+            ]);
+            return;
+        }
+
+        StoreRepository::aggiorna($id, $_POST);
+        header('Location: ' . Percorsi::a('/punti-vendita/' . $id) . '?esito=scheda-salvata');
+    }
+
+    /** Registra un referente del punto vendita. */
+    public function creaContatto(int $id): void
+    {
+        if (StoreRepository::trova($id) === null) {
+            http_response_code(404);
+            View::rendi('errore', [
+                'titoloPagina' => 'Non trovato',
+                'titolo' => 'Punto vendita non trovato',
+                'messaggio' => 'Nessun punto vendita con identificativo ' . $id . '.',
+            ]);
+            return;
+        }
+
+        // Il modulo ha gia' i campi obbligatori, ma una POST puo' arrivare da
+        // qualunque parte: un referente senza nome non serve a nessuno.
+        if (trim((string) ($_POST['full_name'] ?? '')) === '') {
+            header('Location: ' . Percorsi::a('/punti-vendita/' . $id) . '?esito=referente-senza-nome');
+            return;
+        }
+
+        StoreRepository::creaContatto($id, $_POST);
+        header('Location: ' . Percorsi::a('/punti-vendita/' . $id) . '?esito=referente-aggiunto');
     }
 
     public function scheda(int $id): void

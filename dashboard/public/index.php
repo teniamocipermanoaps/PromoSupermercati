@@ -86,6 +86,8 @@ $router->get('/banchetti', [new App\Controllers\BanchettiController(), 'index'](
 
 $router->post('/campagne', [new App\Controllers\CampagneController(), 'crea'](...));
 $router->post('/banchetti', [new App\Controllers\BanchettiController(), 'crea'](...));
+$router->post('/punti-vendita/{id}', [new App\Controllers\StoreController(), 'aggiorna'](...));
+$router->post('/punti-vendita/{id}/contatti', [new App\Controllers\StoreController(), 'creaContatto'](...));
 $router->post('/richieste', [new App\Controllers\OutreachController(), 'crea'](...));
 $router->post('/richieste/{id}', [new App\Controllers\OutreachController(), 'aggiorna'](...));
 

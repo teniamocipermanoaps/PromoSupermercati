@@ -11,11 +11,18 @@ $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_fo
   · <?= View::e($punto['city']) ?> (<?= View::e($punto['province']) ?>)
 </p>
 
-<?php $esito = $_GET['esito'] ?? ''; ?>
-<?php if ($esito === 'dati-non-validi'): ?>
-  <div class="avviso errore">Richiesta non salvata: controlla nome, date e che la fine non preceda l'inizio.</div>
-<?php elseif ($esito !== ''): ?>
-  <div class="avviso">Richiesta salvata.</div>
+<?php
+$esito = $_GET['esito'] ?? '';
+$messaggi = [
+    'dati-non-validi' => ['errore', "Richiesta non salvata: controlla nome, date e che la fine non preceda l'inizio."],
+    'referente-senza-nome' => ['errore', 'Referente non salvato: manca il nome.'],
+    'scheda-salvata' => ['', 'Scheda salvata.'],
+    'referente-aggiunto' => ['', 'Referente registrato.'],
+];
+?>
+<?php if ($esito !== ''): ?>
+  <?php [$classe, $testo] = $messaggi[$esito] ?? ['', 'Richiesta salvata.']; ?>
+  <div class="avviso <?= $classe ?>"><?= View::e($testo) ?></div>
 <?php endif; ?>
 
 <div class="griglia-due">
@@ -24,13 +31,48 @@ $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_fo
     <dl class="dati">
       <dt>Indirizzo</dt><dd><?= View::e($punto['address']) ?: '—' ?></dd>
       <dt>CAP</dt><dd><?= View::e($punto['postal_code']) ?: '—' ?></dd>
-      <dt>Telefono</dt><dd><?php $numero = $punto['phone']; require __DIR__ . '/../partials/telefono.php'; ?></dd>
-      <dt>Orari</dt><dd><?= View::e($punto['opening_hours']) ?: '—' ?></dd>
-      <dt>Parcheggio</dt><dd><?= $punto['has_parking'] === null ? '—' : ((int) $punto['has_parking'] === 1 ? 'sì' : 'no') ?></dd>
-      <dt>Spazio esterno</dt><dd><?= View::e($punto['outdoor_space_notes']) ?: '—' ?></dd>
     </dl>
+    <p class="nota-campo">
+      Nome e indirizzo arrivano da OpenStreetMap e vengono riscritti a ogni
+      aggiornamento dell'anagrafica: per questo non si modificano da qui.
+      I campi qui sotto invece restano quelli che scrivi tu.
+    </p>
 
-    <h2 style="margin-top:20px">Referenti</h2>
+    <form method="post" action="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $punto['id'] ?>">
+      <?= Csrf::campo() ?>
+      <div class="campi">
+        <div>
+          <label for="s-telefono">Telefono</label>
+          <input type="tel" id="s-telefono" name="phone" value="<?= View::e($punto['phone']) ?>"
+                 placeholder="es. 081 5551234">
+        </div>
+        <div>
+          <label for="s-email">Email</label>
+          <input type="email" id="s-email" name="email" value="<?= View::e($punto['email']) ?>">
+        </div>
+        <div>
+          <label for="s-orari">Orari</label>
+          <input type="text" id="s-orari" name="opening_hours" value="<?= View::e($punto['opening_hours']) ?>"
+                 placeholder="es. 08:30-21:00">
+        </div>
+        <div>
+          <label for="s-parcheggio">Parcheggio</label>
+          <select id="s-parcheggio" name="has_parking">
+            <option value="" <?= $punto['has_parking'] === null ? 'selected' : '' ?>>non so</option>
+            <option value="1" <?= (string) $punto['has_parking'] === '1' ? 'selected' : '' ?>>sì, ampio</option>
+            <option value="0" <?= (string) $punto['has_parking'] === '0' ? 'selected' : '' ?>>no</option>
+          </select>
+        </div>
+        <div class="campo-largo">
+          <label for="s-spazio">Spazio esterno per il banchetto</label>
+          <textarea id="s-spazio" name="outdoor_space_notes"
+                    placeholder="es. area coperta a destra dell'ingresso, circa 3 metri"><?= View::e($punto['outdoor_space_notes']) ?></textarea>
+        </div>
+      </div>
+      <button type="submit">Salva scheda</button>
+    </form>
+
+    <h2 style="margin-top:24px">Referenti</h2>
     <?php if ($contatti === []): ?>
       <p class="vuoto">Nessun referente registrato.</p>
     <?php else: ?>
@@ -41,6 +83,38 @@ $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_fo
         <?php endforeach; ?>
       </dl>
     <?php endif; ?>
+
+    <form method="post" action="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $punto['id'] ?>/contatti">
+      <?= Csrf::campo() ?>
+      <div class="campi">
+        <div>
+          <label for="r-nome">Nome del referente</label>
+          <input type="text" id="r-nome" name="full_name" required placeholder="es. M. Esposito">
+        </div>
+        <div>
+          <label for="r-ruolo">Ruolo</label>
+          <input type="text" id="r-ruolo" name="role" placeholder="es. direttore">
+        </div>
+        <div>
+          <label for="r-telefono">Telefono</label>
+          <input type="tel" id="r-telefono" name="phone">
+        </div>
+        <div>
+          <label for="r-canale">Come preferisce</label>
+          <select id="r-canale" name="preferred_channel">
+            <option value="">—</option>
+            <?php foreach (['telefono', 'email', 'di_persona', 'pec'] as $canale): ?>
+              <option value="<?= View::e($canale) ?>"><?= View::e(str_replace('_', ' ', $canale)) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="tenue">Aggiungi referente</button>
+      <span class="nota-campo">
+        Sono dati personali: il minimo che serve a gestire il rapporto, e si
+        tolgono quando il rapporto si chiude.
+      </span>
+    </form>
   </div>
 
   <div class="riquadro">

@@ -190,3 +190,13 @@ dl.dati dd { margin: 0; }
 .accesso button { width: 100%; }
 .nota-accesso { color: var(--testo-tenue); font-size: 13px; margin-top: 16px; }
 .nota-accesso code { font-size: 12px; word-break: break-all; }
+
+/* Elenco dei punti vendita e schede modificabili --------------------- */
+
+/* L'indirizzo sotto il nome: in una citta' ci sono dieci Conad, e senza
+   l'indirizzo bisognerebbe aprirli uno per uno. */
+.indirizzo { color: var(--testo-tenue); font-size: 12px; }
+.nota-campo { color: var(--testo-tenue); font-size: 12px; margin: 8px 0 14px; }
+.filtri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.filtri .campo-largo { grid-column: 1 / -1; }
+.filtri button, .filtri .bottone { height: 38px; }
