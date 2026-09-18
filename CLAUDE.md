@@ -159,6 +159,31 @@ chiuso: se non riesce a verificare, l'esito e' BLOCCATO. Le catene restano
 `enabled: false` finche' l'esito non e' documentato in `chains.legal_notes`. Se
 un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
 
+**Gli aggregatori di volantini sono un problema diverso dalle catene.** Siti
+come doveconviene.it, centrovolantini.it e volantinofacile.it hanno gia' in un
+posto solo le date di tutte e undici le insegne: e' proprio quello che ci
+serve, ed e' proprio per questo che non si raccoglie da li'.
+
+Quella raccolta **e' il loro prodotto**, non un sottoprodotto come per un
+supermercato. Oltre ai Termini d'uso, che praticamente sempre vietano
+l'estrazione automatica, c'e' il **diritto sui generis del costitutore di una
+banca dati** (direttiva 96/9/CE, in Italia art. 102-bis del Codice della
+proprieta' industriale): estrarre una parte sostanziale di una banca dati e'
+illecito di per se', anche se i singoli dati non sono protetti da copyright e
+anche se il `robots.txt` tace. Su un sito di catena si discute di ToS; su un
+aggregatore si discute anche di questo, ed e' il titolare ad avere l'interesse
+economico a farlo valere.
+
+La strada praticabile con un aggregatore e' **chiedere**: un'associazione che
+organizza banchetti solidali e ha bisogno solo di due date per insegna e per
+zona e' una richiesta ragionevole, e un si' scritto vale piu' di qualunque
+scraper. Finche' non c'e', le date si inseriscono a mano dalla pagina Campagne.
+
+Le catene restano la fonte di prima scelta anche quando costano piu' lavoro:
+il volantino sul sito di Penny e' materiale pubblicitario che l'insegna vuole
+far circolare, e la nostra e' una lettura di metadati, due date. Sull'aggregatore
+la stessa lettura tocca il suo archivio.
+
 ## Stato
 
 | | |

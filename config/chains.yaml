@@ -182,7 +182,9 @@ chains:
     name: Penny Market
     segment: discount
     adapter: penny
-    website: "https://www.pennymarket.it"
+    # Il dominio storico pennymarket.it rimanda a penny.it: il gate deve
+    # verificare il dominio vero, altrimenti controlla un redirect.
+    website: "https://www.penny.it"
     enabled: false
     legal_notes: "robots.txt e ToS non ancora verificati"
     # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
@@ -190,7 +192,9 @@ chains:
     osm_brands: ["Penny", "Penny Market"]
     discovery:
       mode: store_picker
-      url_template: null
+      # Pagina del volantino: e' il percorso che check_robots.py deve provare,
+      # non la sola homepage. Un robots che consente "/" puo' negare questo.
+      url_template: "https://www.penny.it/sfoglia-il-volantino-mobile"
       selectors: {}
     banners:
       - { slug: penny,  name: "Penny", format: discount }
