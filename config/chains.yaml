@@ -32,18 +32,18 @@ chains:
     website: "https://www.conad.it"
     enabled: false
     legal_notes: "robots.txt VERIFICATO 2026-09-17 su https://www.conad.it/ricerca-negozi: consentito (copia in storage/legal/). ToS NON ancora letti: enabled resta false finche' non lo sono."
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Conad", "Conad City", "Conad Superstore", "Spazio Conad"]
     discovery:
-      mode: store_picker        # store_picker | api | sitemap | iframe
-      url_template: null        # da compilare dopo l'ispezione del sito
+      mode: store_picker
+      url_template: null
       selectors: {}
-    # Tipologie di punto vendita: dimensione di analisi, non dettaglio.
     banners:
-      - { slug: conad-city,       name: "Conad City",       format: superette }
-      - { slug: conad,            name: "Conad",            format: supermercato }
-      - { slug: conad-superstore, name: "Conad Superstore", format: superstore }
-      - { slug: spazio-conad,     name: "Spazio Conad",     format: ipermercato }
-    stores_filter:
-      provinces: [NA, RM, MI, TO, BA]
+      - { slug: conad-city,        name: "Conad City", format: superette }
+      - { slug: conad,             name: "Conad", format: supermercato }
+      - { slug: conad-superstore,  name: "Conad Superstore", format: superstore }
+      - { slug: spazio-conad,      name: "Spazio Conad", format: ipermercato }
 
   - slug: carrefour
     name: Carrefour Italia
@@ -52,16 +52,17 @@ chains:
     website: "https://www.carrefour.it"
     enabled: false
     legal_notes: "robots.txt VERIFICATO 2026-09-17 su https://www.carrefour.it/volantino: consentito (copia in storage/legal/). ToS NON ancora letti: enabled resta false finche' non lo sono."
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Carrefour", "Carrefour Express", "Carrefour Market", "Carrefour Iper"]
     discovery:
       mode: store_picker
       url_template: null
       selectors: {}
     banners:
-      - { slug: carrefour-express, name: "Carrefour Express", format: superette }
-      - { slug: carrefour-market,  name: "Carrefour Market",  format: supermercato }
-      - { slug: carrefour-iper,    name: "Carrefour Iper",    format: ipermercato }
-    stores_filter:
-      provinces: [NA, RM, MI, TO, BA]
+      - { slug: carrefour-express,  name: "Carrefour Express", format: superette }
+      - { slug: carrefour-market,   name: "Carrefour Market", format: supermercato }
+      - { slug: carrefour-iper,     name: "Carrefour Iper", format: ipermercato }
 
   - slug: lidl
     name: Lidl Italia
@@ -70,11 +71,159 @@ chains:
     website: "https://www.lidl.it"
     enabled: false
     legal_notes: "robots.txt VERIFICATO 2026-09-17 su https://www.lidl.it/c/volantino/s10005610: consentito (copia in storage/legal/). ToS NON ancora letti: enabled resta false finche' non lo sono."
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Lidl"]
     discovery:
       mode: store_picker
       url_template: null
       selectors: {}
     banners:
-      - { slug: lidl, name: "Lidl", format: discount }
-    stores_filter:
-      provinces: [NA, RM, MI, TO, BA]
+      - { slug: lidl,  name: "Lidl", format: discount }
+
+  - slug: deco
+    name: Deco
+    segment: insegna_tradizionale
+    adapter: deco
+    website: "https://www.decoitalia.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Deco", "Decò", "Deco Maxi", "Decò Maxi"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: deco,       name: "Deco", format: supermercato }
+      - { slug: deco-maxi,  name: "Deco Maxi", format: superstore }
+
+  - slug: coop
+    name: Coop
+    segment: insegna_tradizionale
+    adapter: coop
+    website: "https://www.e-coop.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Coop", "Ipercoop", "InCoop", "Coop Superstore"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: incoop,           name: "InCoop", format: superette }
+      - { slug: coop,             name: "Coop", format: supermercato }
+      - { slug: coop-superstore,  name: "Coop Superstore", format: superstore }
+      - { slug: ipercoop,         name: "Ipercoop", format: ipermercato }
+
+  - slug: esselunga
+    name: Esselunga
+    segment: insegna_tradizionale
+    adapter: esselunga
+    website: "https://www.esselunga.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Esselunga", "La Esse"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: la-esse,               name: "La Esse", format: superette }
+      - { slug: esselunga,             name: "Esselunga", format: supermercato }
+      - { slug: esselunga-superstore,  name: "Esselunga Superstore", format: superstore }
+
+  - slug: eurospin
+    name: Eurospin
+    segment: discount
+    adapter: eurospin
+    website: "https://www.eurospin.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Eurospin"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: eurospin,  name: "Eurospin", format: discount }
+
+  - slug: md
+    name: MD
+    segment: discount
+    adapter: md
+    website: "https://www.mdspa.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["MD", "MD Discount"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: md,  name: "MD", format: discount }
+
+  - slug: penny
+    name: Penny Market
+    segment: discount
+    adapter: penny
+    website: "https://www.pennymarket.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Penny", "Penny Market"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: penny,  name: "Penny Market", format: discount }
+
+  - slug: despar
+    name: Despar Italia
+    segment: insegna_tradizionale
+    adapter: despar
+    website: "https://www.despar.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Despar", "Eurospar", "Interspar"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: despar,     name: "Despar", format: supermercato }
+      - { slug: eurospar,   name: "Eurospar", format: superstore }
+      - { slug: interspar,  name: "Interspar", format: ipermercato }
+
+  - slug: pam
+    name: Pam Panorama
+    segment: insegna_tradizionale
+    adapter: pam
+    website: "https://www.pampanorama.it"
+    enabled: false
+    legal_notes: "robots.txt e ToS non ancora verificati"
+    # Nomi con cui l'insegna compare in OpenStreetMap (tag brand o name).
+    # Servono a ops/scripts/importa_negozi_osm.py per riconoscere i negozi.
+    osm_brands: ["Pam", "Pam local", "Panorama", "Pam City"]
+    discovery:
+      mode: store_picker
+      url_template: null
+      selectors: {}
+    banners:
+      - { slug: pam-local,  name: "Pam local", format: superette }
+      - { slug: pam,        name: "Pam", format: supermercato }
+      - { slug: panorama,   name: "Panorama", format: ipermercato }
+

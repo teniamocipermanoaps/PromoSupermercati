@@ -1,22 +1,114 @@
-# Citta' dell'MVP. Aggiungere una citta' = una voce qui + i PDV in stores.yaml.
+# Le 100 citta' in cui l'associazione ha volontari.
+#
+# I punti vendita NON si elencano piu' a mano: si importano da OpenStreetMap
+# con ops/scripts/importa_negozi_osm.py, che usa questo elenco per sapere dove
+# cercare. I CAP non servono all'importazione e non sono elencati: arrivano dal
+# dato OSM quando c'e'.
+#
+# Aggiungere una citta' = una voce qui, poi rilanciare l'importatore.
+#
+# I codici provincia vanno fra virgolette: senza, YAML legge NO (Novara) come
+# il booleano falso. E' la stessa trappola per cui la Norvegia sparisce dai
+# file di configurazione scritti male.
+
 cities:
-  - name: Napoli
-    province: NA
-    region: Campania
-    postal_codes: ["80100", "80121", "80122", "80125", "80131", "80142"]
-  - name: Roma
-    province: RM
-    region: Lazio
-    postal_codes: ["00100", "00118", "00135", "00154", "00168", "00184"]
-  - name: Milano
-    province: MI
-    region: Lombardia
-    postal_codes: ["20121", "20124", "20131", "20142", "20155"]
-  - name: Torino
-    province: TO
-    region: Piemonte
-    postal_codes: ["10121", "10126", "10134", "10144", "10152"]
-  - name: Bari
-    province: BA
-    region: Puglia
-    postal_codes: ["70121", "70124", "70125", "70126", "70132"]
+  - { name: "Roma", province: "RM", region: "Lazio" }
+  - { name: "Milano", province: "MI", region: "Lombardia" }
+  - { name: "Napoli", province: "NA", region: "Campania" }
+  - { name: "Torino", province: "TO", region: "Piemonte" }
+  - { name: "Palermo", province: "PA", region: "Sicilia" }
+  - { name: "Genova", province: "GE", region: "Liguria" }
+  - { name: "Bologna", province: "BO", region: "Emilia-Romagna" }
+  - { name: "Firenze", province: "FI", region: "Toscana" }
+  - { name: "Bari", province: "BA", region: "Puglia" }
+  - { name: "Catania", province: "CT", region: "Sicilia" }
+  - { name: "Venezia", province: "VE", region: "Veneto" }
+  - { name: "Verona", province: "VR", region: "Veneto" }
+  - { name: "Messina", province: "ME", region: "Sicilia" }
+  - { name: "Padova", province: "PD", region: "Veneto" }
+  - { name: "Trieste", province: "TS", region: "Friuli-Venezia Giulia" }
+  - { name: "Parma", province: "PR", region: "Emilia-Romagna" }
+  - { name: "Brescia", province: "BS", region: "Lombardia" }
+  - { name: "Prato", province: "PO", region: "Toscana" }
+  - { name: "Taranto", province: "TA", region: "Puglia" }
+  - { name: "Modena", province: "MO", region: "Emilia-Romagna" }
+  - { name: "Reggio Calabria", province: "RC", region: "Calabria" }
+  - { name: "Reggio Emilia", province: "RE", region: "Emilia-Romagna" }
+  - { name: "Perugia", province: "PG", region: "Umbria" }
+  - { name: "Ravenna", province: "RA", region: "Emilia-Romagna" }
+  - { name: "Livorno", province: "LI", region: "Toscana" }
+  - { name: "Cagliari", province: "CA", region: "Sardegna" }
+  - { name: "Foggia", province: "FG", region: "Puglia" }
+  - { name: "Rimini", province: "RN", region: "Emilia-Romagna" }
+  - { name: "Salerno", province: "SA", region: "Campania" }
+  - { name: "Ferrara", province: "FE", region: "Emilia-Romagna" }
+  - { name: "Sassari", province: "SS", region: "Sardegna" }
+  - { name: "Latina", province: "LT", region: "Lazio" }
+  - { name: "Giugliano in Campania", province: "NA", region: "Campania" }
+  - { name: "Monza", province: "MB", region: "Lombardia" }
+  - { name: "Siracusa", province: "SR", region: "Sicilia" }
+  - { name: "Pescara", province: "PE", region: "Abruzzo" }
+  - { name: "Bergamo", province: "BG", region: "Lombardia" }
+  - { name: "Forlì", province: "FC", region: "Emilia-Romagna" }
+  - { name: "Trento", province: "TN", region: "Trentino-Alto Adige" }
+  - { name: "Vicenza", province: "VI", region: "Veneto" }
+  - { name: "Terni", province: "TR", region: "Umbria" }
+  - { name: "Bolzano", province: "BZ", region: "Trentino-Alto Adige" }
+  - { name: "Novara", province: "NO", region: "Piemonte" }
+  - { name: "Piacenza", province: "PC", region: "Emilia-Romagna" }
+  - { name: "Ancona", province: "AN", region: "Marche" }
+  - { name: "Andria", province: "BT", region: "Puglia" }
+  - { name: "Arezzo", province: "AR", region: "Toscana" }
+  - { name: "Udine", province: "UD", region: "Friuli-Venezia Giulia" }
+  - { name: "Cesena", province: "FC", region: "Emilia-Romagna" }
+  - { name: "Lecce", province: "LE", region: "Puglia" }
+  - { name: "Pesaro", province: "PU", region: "Marche" }
+  - { name: "Barletta", province: "BT", region: "Puglia" }
+  - { name: "Alessandria", province: "AL", region: "Piemonte" }
+  - { name: "La Spezia", province: "SP", region: "Liguria" }
+  - { name: "Pistoia", province: "PT", region: "Toscana" }
+  - { name: "Pisa", province: "PI", region: "Toscana" }
+  - { name: "Catanzaro", province: "CZ", region: "Calabria" }
+  - { name: "Guidonia Montecelio", province: "RM", region: "Lazio" }
+  - { name: "Lucca", province: "LU", region: "Toscana" }
+  - { name: "Brindisi", province: "BR", region: "Puglia" }
+  - { name: "Torre del Greco", province: "NA", region: "Campania" }
+  - { name: "Treviso", province: "TV", region: "Veneto" }
+  - { name: "Busto Arsizio", province: "VA", region: "Lombardia" }
+  - { name: "Como", province: "CO", region: "Lombardia" }
+  - { name: "Marsala", province: "TP", region: "Sicilia" }
+  - { name: "Grosseto", province: "GR", region: "Toscana" }
+  - { name: "Sesto San Giovanni", province: "MI", region: "Lombardia" }
+  - { name: "Pozzuoli", province: "NA", region: "Campania" }
+  - { name: "Varese", province: "VA", region: "Lombardia" }
+  - { name: "Fiumicino", province: "RM", region: "Lazio" }
+  - { name: "Casoria", province: "NA", region: "Campania" }
+  - { name: "Asti", province: "AT", region: "Piemonte" }
+  - { name: "Cinisello Balsamo", province: "MI", region: "Lombardia" }
+  - { name: "Caserta", province: "CE", region: "Campania" }
+  - { name: "Gela", province: "CL", region: "Sicilia" }
+  - { name: "Aprilia", province: "LT", region: "Lazio" }
+  - { name: "Ragusa", province: "RG", region: "Sicilia" }
+  - { name: "Pavia", province: "PV", region: "Lombardia" }
+  - { name: "Cremona", province: "CR", region: "Lombardia" }
+  - { name: "Carpi", province: "MO", region: "Emilia-Romagna" }
+  - { name: "Quartu Sant'Elena", province: "CA", region: "Sardegna" }
+  - { name: "Lamezia Terme", province: "CZ", region: "Calabria" }
+  - { name: "Altamura", province: "BA", region: "Puglia" }
+  - { name: "Imola", province: "BO", region: "Emilia-Romagna" }
+  - { name: "L'Aquila", province: "AQ", region: "Abruzzo" }
+  - { name: "Massa", province: "MS", region: "Toscana" }
+  - { name: "Trapani", province: "TP", region: "Sicilia" }
+  - { name: "Viterbo", province: "VT", region: "Lazio" }
+  - { name: "Cosenza", province: "CS", region: "Calabria" }
+  - { name: "Potenza", province: "PZ", region: "Basilicata" }
+  - { name: "Castellammare di Stabia", province: "NA", region: "Campania" }
+  - { name: "Afragola", province: "NA", region: "Campania" }
+  - { name: "Vittoria", province: "RG", region: "Sicilia" }
+  - { name: "Crotone", province: "KR", region: "Calabria" }
+  - { name: "Pomezia", province: "RM", region: "Lazio" }
+  - { name: "Vigevano", province: "PV", region: "Lombardia" }
+  - { name: "Carrara", province: "MS", region: "Toscana" }
+  - { name: "Caltanissetta", province: "CL", region: "Sicilia" }
+  - { name: "Viareggio", province: "LU", region: "Toscana" }
+  - { name: "Fano", province: "PU", region: "Marche" }

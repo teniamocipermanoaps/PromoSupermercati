@@ -35,13 +35,14 @@ schema ma **non vengono popolate**. Non rianimarle senza che qualcuno lo chieda.
 ## Struttura
 
 ```
-config/      catene, citta', punti vendita, impostazioni (YAML)
+config/      11 insegne, 100 citta', impostazioni (YAML)
 db/          4 migration + seed; 900_demo.sql contiene dati INVENTATI
 crawler/     pacchetto Python: adapter, gate robots, normalizzatore, analisi
 dashboard/   MVC PHP vanilla + PDO, nessun framework
-ops/         check_robots.py (gate legale), demo.sh (avvio dimostrativo),
-             crea_utente.php (accessi), verifica_produzione.sh (controllo
-             della messa in opera), deploy/ (configurazioni del server web)
+ops/         check_robots.py (gate legale), importa_negozi_osm.py (anagrafica
+             da OpenStreetMap), demo.sh (avvio dimostrativo), crea_utente.php
+             (accessi), verifica_produzione.sh (controllo della messa in
+             opera), deploy/ (configurazioni del server web)
 docs/        traccia per le segretarie e messa in opera
 ```
 
@@ -122,6 +123,24 @@ insegna opera formati con promozioni diverse (Conad City contro Spazio Conad,
 Carrefour Express contro Iper). Confrontare le insegne ignorando il formato da'
 numeri senza significato.
 
+**I punti vendita si importano, non si scrivono a mano.**
+`ops/scripts/importa_negozi_osm.py` legge le 100 citta' e le 11 insegne dalla
+configurazione e produce SQL da OpenStreetMap, che e' dato aperto: nessun
+Termine d'uso da leggere, nessun sito da raschiare, nessun adapter da
+mantenere. Stampa SQL invece di scrivere nel database, e usa l'id
+OpenStreetMap come `external_id`, quindi rilanciarlo aggiorna le schede invece
+di duplicarle. I telefoni in OSM sono pochi: li completano le segretarie man
+mano che chiamano.
+
+**Una campagna si aggancia a tutta l'insegna, e su scala nazionale non basta.**
+Il modulo in `dashboard/app/Views/campagne/index.php` collega la campagna a
+tutti i punti vendita attivi della catena. Con 100 citta' e' sbagliato: Conad
+e' una federazione di cooperative regionali che fanno volantini con date
+diverse, quindi lo stesso "Sottocosto" a Bari e a Torino cade in settimane
+differenti. Il database lo regge gia' (`flyer_stores` collega singoli punti
+vendita), manca la scelta nel modulo. **Difetto noto, da chiudere prima che le
+segretarie si fidino dell'agenda.**
+
 **Niente crawling senza il gate legale.** `ops/scripts/check_robots.py` verifica
 `robots.txt` e archivia una copia datata in `storage/legal/`. Fallisce in modo
 chiuso: se non riesce a verificare, l'esito e' BLOCCATO. Le catene restano
@@ -133,23 +152,29 @@ un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
 | | |
 |---|---|
 | Schema DB | migration 001-004 applicate e verificate su MariaDB 10.11 |
+| Copertura | 100 citta' da nord a sud isole comprese, 11 insegne (`config/`) |
 | Dashboard | 4 pagine piu' l'accesso, usabile da telefono |
 | Crawler | contratto adapter, registro, gate robots, rate limiter, normalizzatore |
 | Gate legale | robots.txt verificato il 2026-09-17: tutte e tre consentono. **Termini d'uso non ancora letti** |
 | Adapter Conad / Carrefour / Lidl | **non scritti**: le catene restano `enabled: false` finche' i ToS non sono letti |
 | Autenticazione | accesso con email e password, ogni pagina protetta |
-| Messa in opera | `docs/messa-in-opera.md`, configurazioni in `ops/deploy/`, controllo con `verifica_produzione.sh` |
+| Messa in opera | in produzione su `gestionaletpmo.it/promosupermercati` dal 2026-09-17 |
+| Anagrafica punti vendita | importatore OSM pronto, **import non ancora eseguito**: l'archivio e' vuoto |
 
 ## Cosa fare per primo
 
-1. **Mettere online la dashboard** su `gestionaletpmo.it/promosupermercati`,
-   seguendo `docs/messa-in-opera.md`. Il certificato non e' facoltativo: su
-   HTTP la password della segretaria viaggia in chiaro.
-2. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
+1. **Importare i punti vendita** con `ops/scripts/importa_negozi_osm.py`.
+   Finche' l'archivio e' vuoto la dashboard non serve a niente: e' il passo
+   che la trasforma in uno strumento. Va eseguito dal server, che raggiunge
+   Overpass.
+2. **La scelta dell'area nel modulo Campagne**, vedi i punti delicati: senza,
+   l'agenda proporra' a una segretaria di Torino giorni che valgono per Bari.
+
+3. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
    verificato e consente (2026-09-17, copie in `storage/legal/`), ma e' solo
    meta' del gate: i ToS vietano spesso la raccolta automatica anche dove il
    robots tace. Finche' non sono letti e annotati, `enabled` resta `false`.
-3. **Il riscontro delle segretarie** dopo la sessione (vedi
+4. **Il riscontro delle segretarie** dopo la sessione (vedi
    `docs/sessione-segretarie.md`): attesi campi mancanti nella scheda del punto
    vendita e stati della richiesta diversi dai sei ipotizzati.
 
