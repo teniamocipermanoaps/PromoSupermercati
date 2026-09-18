@@ -141,12 +141,37 @@ echo "== creazione campagna =="
 TOKEN=$(token_di /campagne)
 [ -n "$TOKEN" ] && printf '  OK   token CSRF presente nel modulo\n' || { printf '  FAIL token CSRF assente\n'; FALLITI=$((FALLITI+1)); }
 ETICHETTA="Test automatico $(date +%s)"
-creazione=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code}' -X POST \
+creazione=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{http_code} %{redirect_url}' -X POST \
   --data-urlencode "_csrf=$TOKEN" --data-urlencode "chain_id=1" \
   --data-urlencode "title=$ETICHETTA" --data-urlencode "valid_from=2026-11-05" \
   --data-urlencode "valid_to=2026-11-18" "$BASE/campagne")
-controlla "POST campagna reindirizza" 302 "$creazione"
+controlla "POST campagna reindirizza" 302 "${creazione%% *}"
 contiene "campagna presente in elenco" /campagne "$ETICHETTA"
+
+# Senza province scelte la campagna vale per tutta l'insegna: se l'archivio ha
+# punti vendita ne deve agganciare almeno uno, altrimenti non arriva in agenda.
+if [ -n "$PDV" ]; then
+  case "${creazione#* }" in
+    *negozi=0|*negozi=0\&*) printf '  FAIL campagna nazionale senza punti vendita (%s)\n' "${creazione#* }"; FALLITI=$((FALLITI+1)) ;;
+    *negozi=*) printf '  OK   campagna nazionale collegata ai punti vendita\n' ;;
+    *) printf '  FAIL conteggio dei punti vendita assente (%s)\n' "${creazione#* }"; FALLITI=$((FALLITI+1)) ;;
+  esac
+fi
+
+# ZZ non e' una provincia italiana: nessun negozio puo' caderci dentro. Se il
+# filtro sparisse, la campagna aggancerebbe tutti i PDV della catena e questa
+# prova fallirebbe. E' il guardiano del punto 2: un'agenda che propone a una
+# segretaria di Torino i giorni buoni per Bari non serve a nessuno.
+echo "== la campagna si limita alle province scelte =="
+TOKEN=$(token_di /campagne)
+zona=$(curl -s -b "$COOKIE" -c "$COOKIE" -o /dev/null -w '%{redirect_url}' -X POST \
+  --data-urlencode "_csrf=$TOKEN" --data-urlencode "chain_id=1" \
+  --data-urlencode "title=Test zona $(date +%s)" --data-urlencode "valid_from=2026-11-05" \
+  --data-urlencode "valid_to=2026-11-18" --data-urlencode "province[]=ZZ" "$BASE/campagne")
+case "$zona" in
+  *negozi=0) printf '  OK   provincia senza negozi: campagna non collegata\n' ;;
+  *) printf '  FAIL il filtro per provincia non viene applicato (%s)\n' "$zona"; FALLITI=$((FALLITI+1)) ;;
+esac
 
 echo "== validazione =="
 TOKEN=$(token_di /campagne)

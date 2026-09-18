@@ -200,3 +200,14 @@ dl.dati dd { margin: 0; }
 .filtri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
 .filtri .campo-largo { grid-column: 1 / -1; }
 .filtri button, .filtri .bottone { height: 38px; }
+
+/* Le province di una campagna: caselle invece di un elenco a scelta multipla,
+   perche' dal telefono il Ctrl+clic non esiste. */
+.province { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 4px; max-height: 210px; overflow-y: auto; padding: 8px;
+            border: 1px solid var(--bordo); border-radius: var(--raggio); }
+.provincia { display: flex; align-items: center; gap: 6px; padding: 6px 4px;
+             border-radius: 4px; font-weight: 400; cursor: pointer; }
+.provincia:hover { background: var(--accento-tenue); }
+.provincia input { width: auto; margin: 0; }
+.provincia small { color: var(--testo-tenue); margin-left: auto; }

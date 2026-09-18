@@ -132,14 +132,26 @@ OpenStreetMap come `external_id`, quindi rilanciarlo aggiorna le schede invece
 di duplicarle. I telefoni in OSM sono pochi: li completano le segretarie man
 mano che chiamano.
 
-**Una campagna si aggancia a tutta l'insegna, e su scala nazionale non basta.**
-Il modulo in `dashboard/app/Views/campagne/index.php` collega la campagna a
-tutti i punti vendita attivi della catena. Con 100 citta' e' sbagliato: Conad
-e' una federazione di cooperative regionali che fanno volantini con date
-diverse, quindi lo stesso "Sottocosto" a Bari e a Torino cade in settimane
-differenti. Il database lo regge gia' (`flyer_stores` collega singoli punti
-vendita), manca la scelta nel modulo. **Difetto noto, da chiudere prima che le
-segretarie si fidino dell'agenda.**
+**Una campagna si aggancia per provincia, non a tutta l'insegna.** Conad e' una
+federazione di cooperative regionali che fanno volantini con date diverse,
+quindi lo stesso "Sottocosto" a Bari e a Torino cade in settimane differenti:
+collegare la campagna a tutta la catena farebbe proporre a una segretaria di
+Torino i giorni buoni per Bari. Il modulo in
+`dashboard/app/Views/campagne/index.php` ha un elenco di province a scelta
+multipla; `CampaignRepository::crea()` lo traduce in `AND province IN (...)`
+sulle sole sigle di due maiuscole che superano il filtro nel controller.
+Nessuna provincia scelta = tutta Italia, che resta giusto per le catene a
+insegna unica (Lidl, Eurospin, MD). Se la scelta non aggancia nessun negozio,
+la pagina lo dice invece di far finta di niente: una campagna senza punti
+vendita non compare in agenda. `dashboard/tests/smoke.sh` crea una campagna
+sulla provincia inesistente `ZZ` e fa fallire la build se aggancia qualcosa.
+
+La provincia e' la granularita' che si puo' avere oggi, non quella giusta per
+sempre: le aree promozionali vere di Conad e Coop sono raggruppamenti di
+cooperative che non coincidono con i confini amministrativi. Si mappano quando
+le segretarie avranno visto abbastanza volantini veri da sapere quali
+raggruppamenti esistono; `flyer_stores` collega gia' singoli punti vendita,
+quindi il passaggio non tocca lo schema.
 
 **Niente crawling senza il gate legale.** `ops/scripts/check_robots.py` verifica
 `robots.txt` e archivia una copia datata in `storage/legal/`. Fallisce in modo
@@ -167,14 +179,11 @@ un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
    Finche' l'archivio e' vuoto la dashboard non serve a niente: e' il passo
    che la trasforma in uno strumento. Va eseguito dal server, che raggiunge
    Overpass.
-2. **La scelta dell'area nel modulo Campagne**, vedi i punti delicati: senza,
-   l'agenda proporra' a una segretaria di Torino giorni che valgono per Bari.
-
-3. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
+2. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
    verificato e consente (2026-09-17, copie in `storage/legal/`), ma e' solo
    meta' del gate: i ToS vietano spesso la raccolta automatica anche dove il
    robots tace. Finche' non sono letti e annotati, `enabled` resta `false`.
-4. **Il riscontro delle segretarie** dopo la sessione (vedi
+3. **Il riscontro delle segretarie** dopo la sessione (vedi
    `docs/sessione-segretarie.md`): attesi campi mancanti nella scheda del punto
    vendita e stati della richiesta diversi dai sei ipotizzati.
 

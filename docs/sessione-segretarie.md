@@ -51,6 +51,11 @@ Inserimento manuale delle date di un volantino: insegna, titolo, due date.
 - Chi lo farebbe, e quando? Una volta a settimana e' sostenibile?
 - Le date dei volantini dove le trovate oggi?
 - Vi capita che negozi della stessa insegna abbiano volantini diversi?
+- La campagna si limita scegliendo le province. **Quando un volantino non vale
+  per tutta Italia, fin dove arriva?** Se rispondono con un nome che non e' una
+  provincia ("il Tirreno", "la cooperativa di qui"), quello e' il
+  raggruppamento vero e va annotato: e' il dato che serve per sostituire le
+  province con le aree promozionali.
 
 ### 4. Banchetti (10 min)
 
@@ -75,9 +80,8 @@ Le risposte a voce sono gentili, quello che fanno le mani no.
 
 ## Cosa dire che manca, prima che lo chiedano
 
-- **Non c'e' la password.** Chiunque apra l'indirizzo vede tutto, nomi e
-  telefoni dei referenti compresi. Da risolvere prima di uscire da un computer
-  solo.
+- **Serve un accesso.** Ognuna ha email e password sue: non si presta, e
+  quando una volontaria smette si disattiva il suo accesso.
 - **I dati sono inventati.**
 - **Le campagne si inseriscono a mano**: la raccolta automatica e' ferma in
   attesa di verificare robots.txt e condizioni d'uso delle catene.
