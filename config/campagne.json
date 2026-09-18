@@ -1,0 +1,132 @@
+[
+  {
+    "insegna": "lidl",
+    "titolo": "Volantino settimanale",
+    "dal": "2026-09-17",
+    "al": "2026-09-23",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://confrontavolantini.com/anteprima/anteprima-nuovo-volantino-lidl",
+    "note": "Nazionale, stesse date ovunque. Lidl cambia volantino ogni giovedi': e' l'insegna piu' facile da tenere aggiornata."
+  },
+  {
+    "insegna": "penny",
+    "titolo": "Volantino quindicinale",
+    "dal": "2026-09-10",
+    "al": "2026-09-23",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.sbirciaprezzo.com/volantino-penny-10-al-23-settembre-2026/",
+    "note": "Nazionale. Le 'Offerte Shock' cadono venerdi' e sabato (11-12 e 18-19): sono i giorni di punta dentro la finestra."
+  },
+  {
+    "insegna": "eurospin",
+    "titolo": "I grandi del risparmio",
+    "dal": "2026-09-10",
+    "al": "2026-09-20",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.sbirciaprezzo.com/volantino-eurospin-i-grandi-del-risparmio-dal-10-al-20-settembre-2026/",
+    "note": "Nazionale, confermato da due fonti indipendenti."
+  },
+  {
+    "insegna": "md",
+    "titolo": "Sconti fino al 40%",
+    "dal": "2026-09-08",
+    "al": "2026-09-20",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.sbirciaprezzo.com/volantino-md-sconti-fino-al-40-dall08-al-20-settembre-2026/",
+    "note": "Nazionale."
+  },
+  {
+    "insegna": "md",
+    "titolo": "Tutto a 1 euro",
+    "dal": "2026-09-22",
+    "al": "2026-10-04",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.scontrinofelice.it/volantini/anteprima-nuovo-volantino-md/",
+    "note": "Nazionale, gia' annunciato: si puo' chiedere l'autorizzazione con settimane di anticipo."
+  },
+  {
+    "insegna": "esselunga",
+    "titolo": "Sconti Fidaty e Prezzi Corti",
+    "dal": "2026-09-10",
+    "al": "2026-09-23",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.sbirciaprezzo.com/volantino-esselunga-dal-10-al-23-settembre-2026/",
+    "note": "Nazionale. Esselunga sta solo al centro-nord: il filtro per provincia non serve, ci pensa gia' l'anagrafica dei negozi."
+  },
+  {
+    "insegna": "carrefour",
+    "titolo": "Sconti fino al 50% - Express",
+    "dal": "2026-09-10",
+    "al": "2026-09-22",
+    "province": [],
+    "tipologie": ["carrefour-express"],
+    "fonte": "https://www.anteprimavolantino.it/135595/volantino-carrefour-express-dal-10-settembre-2026/",
+    "note": "Carrefour cambia volantino per formato, non per zona: Express ha date sue, diverse da Market e Iper."
+  },
+  {
+    "insegna": "carrefour",
+    "titolo": "Grandi Marche fino al 50% - Market",
+    "dal": "2026-09-15",
+    "al": "2026-09-28",
+    "province": [],
+    "tipologie": ["carrefour-market"],
+    "fonte": "https://www.anteprimavolantino.it/136710/volantino-carrefour-market-dal-15-settembre-2026/",
+    "note": "Solo Market. Gli Iper avevano il Sottocosto dal 4 al 13, gia' chiuso."
+  },
+  {
+    "insegna": "coop",
+    "titolo": "Freschissime offerte",
+    "dal": "2026-09-17",
+    "al": "2026-09-30",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.anteprimavolantino.it/137091/volantino-coop-dal-17-settembre-2026/",
+    "note": "DA CONFERMARE per cooperativa. Coop e' divisa in Alleanza 3.0, Lombardia, Centro Italia e altre: le date possono slittare di qualche giorno. Se una segretaria trova un negozio senza la promozione, vuol dire che qui serve un filtro per provincia."
+  },
+  {
+    "insegna": "despar",
+    "titolo": "Prezzi Piuma - Eurospar",
+    "dal": "2026-09-17",
+    "al": "2026-09-30",
+    "province": [],
+    "tipologie": ["eurospar"],
+    "fonte": "https://tutti-sconti.it/eurospar-offerte",
+    "note": "Despar e' un consorzio con centrali diverse: a settembre girava un volantino per Sardegna e Sicilia e un altro per Trentino e Veneto, con date diverse. Questo e' l'Eurospar; gli altri vanno cercati per zona."
+  },
+  {
+    "insegna": "pam",
+    "titolo": "Offerte di settembre",
+    "dal": "2026-09-11",
+    "al": "2026-09-20",
+    "province": [],
+    "tipologie": ["pam"],
+    "fonte": "https://volantinopromo.com/pam-volantino/",
+    "note": "Solo i Pam: i Panorama hanno un volantino loro, partito il 10 settembre, di cui non ho trovato la data di fine."
+  },
+  {
+    "insegna": "deco",
+    "titolo": "Campioni del risparmio",
+    "dal": "2026-09-11",
+    "al": "2026-09-20",
+    "province": [],
+    "tipologie": [],
+    "fonte": "https://www.volantinofacile.it/deco-supermercati/volantino-deco-supermercati/napoli",
+    "note": "Deco opera solo al sud, quindi nessun filtro: tutti i suoi negozi sono nella zona giusta per definizione."
+  },
+  {
+    "insegna": "conad",
+    "titolo": "Campioni del risparmio",
+    "dal": "2026-09-02",
+    "al": "2026-09-20",
+    "province": ["NA", "SA", "CE", "BN", "AV"],
+    "tipologie": [],
+    "fonte": "https://www.kimbino.it/citta/napoli/conad/",
+    "note": "DA CONFERMARE. Vale per la Campania: Conad Adriatico e Conad Nord Ovest hanno date diverse, e per Torino la ricerca non ha trovato niente di aggiornato. E' il caso che il filtro per provincia esiste apposta per gestire, e quello dove la ricerca automatica serve meno: qui una telefonata al negozio vale piu' di dieci siti."
+  }
+]

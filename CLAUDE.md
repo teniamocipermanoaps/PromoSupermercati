@@ -22,7 +22,11 @@ Il sistema risponde a tre domande:
 ## Cosa il sistema NON fa, di proposito
 
 **Non estrae i prezzi dei volantini.** Non confronta prodotti fra catene, non
-costruisce un catalogo canonico, non usa l'AI per leggere i PDF.
+costruisce un catalogo canonico, non scarica i PDF per leggerli.
+
+Le date invece si cercano, e cercarle e' il cuore del sistema: sono pubblicate
+in chiaro e bastano due numeri per insegna. Il risultato della ricerca entra da
+`config/campagne.json`, non da un crawler.
 
 Il progetto era nato cosi', ed e' stato ridotto quando e' emerso lo scopo reale:
 per sapere quando un negozio e' pieno bastano **le date di inizio e fine della
@@ -35,12 +39,14 @@ schema ma **non vengono popolate**. Non rianimarle senza che qualcuno lo chieda.
 ## Struttura
 
 ```
-config/      11 insegne, 100 citta', impostazioni (YAML)
+config/      11 insegne, 100 citta', impostazioni (YAML); campagne.json con le
+             date dei volantini trovate, da aggiornare ogni settimana
 db/          4 migration + seed; 900_demo.sql contiene dati INVENTATI
 crawler/     pacchetto Python: adapter, gate robots, normalizzatore, analisi
 dashboard/   MVC PHP vanilla + PDO, nessun framework
 ops/         check_robots.py (gate legale), importa_negozi_osm.py (anagrafica
-             da OpenStreetMap), demo.sh (avvio dimostrativo), crea_utente.php
+             da OpenStreetMap), importa_campagne.py (date dei volantini da
+             config/campagne.json), demo.sh (avvio dimostrativo), crea_utente.php
              (accessi), verifica_produzione.sh (controllo della messa in
              opera), deploy/ (configurazioni del server web)
 docs/        traccia per le segretarie e messa in opera
@@ -57,6 +63,10 @@ cd crawler && python3 -m pytest -q        # 63 test
 SMOKE_EMAIL=... SMOKE_PASSWORD=... dashboard/tests/smoke.sh
 
 php dashboard/tests/percorsi_test.php     # 40 prove, senza database ne' server
+
+# Le date dei volantini trovate a mano diventano SQL. Stampa, non esegue.
+python3 ops/scripts/importa_campagne.py config/campagne.json
+python3 ops/scripts/importa_campagne.py config/campagne.json | mysql -u root NOMEDB
 
 # Con SMOKE_DB prova anche che la revoca chiuda una sessione gia' aperta.
 SMOKE_DB=osservatorio_promo_demo SMOKE_EMAIL=... SMOKE_PASSWORD=... \
@@ -146,12 +156,81 @@ la pagina lo dice invece di far finta di niente: una campagna senza punti
 vendita non compare in agenda. `dashboard/tests/smoke.sh` crea una campagna
 sulla provincia inesistente `ZZ` e fa fallire la build se aggancia qualcosa.
 
+**Il modulo Campagne filtra per provincia ma non per tipologia**, mentre
+`importa_campagne.py` fa entrambi. Si vede subito con Carrefour, che a
+settembre 2026 aveva Express dal 10 al 22 e Market dal 15 al 28: inserendo a
+mano quella campagna dal modulo, la si aggancia anche ai negozi del formato
+sbagliato. Difetto noto, piccolo: il filtro per tipologia va aggiunto accanto
+a quello per provincia, con la stessa forma.
+
 La provincia e' la granularita' che si puo' avere oggi, non quella giusta per
 sempre: le aree promozionali vere di Conad e Coop sono raggruppamenti di
 cooperative che non coincidono con i confini amministrativi. Si mappano quando
 le segretarie avranno visto abbastanza volantini veri da sapere quali
 raggruppamenti esistono; `flyer_stores` collega gia' singoli punti vendita,
 quindi il passaggio non tocca lo schema.
+
+**Niente crawling senza il gate legale.** `ops/scripts/check_robots.py` verifica
+`robots.txt` e archivia una copia datata in `storage/legal/`. Fallisce in modo
+chiuso: se non riesce a verificare, l'esito e' BLOCCATO. Le catene restano
+`enabled: false` finche' l'esito non e' documentato in `chains.legal_notes`. Se
+un sito vieta la raccolta, si disattiva la catena: non si aggira il blocco.
+
+**La linea non e' la fonte, e' la scala.** Leggere quando parte e quando
+finisce un volantino e' quello che fa chiunque apra la pagina di un
+supermercato: due date pubblicate apposta per essere lette. Farlo per undici
+insegne una volta a settimana resta quello, e non ha bisogno del permesso di
+nessuno.
+
+Quello che avrebbe bisogno di un permesso e' un'altra cosa: un bot che gira in
+continuo e si ricopia l'archivio di un aggregatore. Siti come doveconviene.it,
+centrovolantini.it e volantinofacile.it campano su quella raccolta, e li'
+entra in gioco il diritto sui generis sulle banche dati (direttiva 96/9/CE,
+art. 102-bis del Codice della proprieta' industriale), che protegge
+l'estrazione di una parte sostanziale anche quando i singoli dati non sono
+protetti e il robots.txt tace.
+
+Fra le due cose ci sta di mezzo tutto lo spazio che serve a questo progetto:
+si cercano poche date, si annota dove si sono lette, e si scrivono in un file.
+Chi cerca puo' essere una persona o un agente, non cambia niente: il risultato
+e' lo stesso, ed e' la ricerca a essere piccola, non lo strumento a essere
+innocente. Il gate di `check_robots.py` resta li' per il giorno in cui
+qualcuno volesse scrivere davvero un crawler continuo, che e' il caso che lo
+richiede.
+
+**Le date delle campagne entrano da un file, non a mano una per una.**
+`ops/scripts/importa_campagne.py` legge un JSON (`config/campagne.json`) con
+insegna, titolo, due date, province e tipologie, e stampa l'SQL. Non cerca
+niente in rete e non scrive nel database: stampa, come l'importatore dei punti
+vendita, perche' fra una ricerca che puo' sbagliare e l'agenda su cui una
+segretaria fa telefonate ci vuole un paio d'occhi.
+
+Controlla tutto prima di produrre una riga di SQL: insegna esistente, date in
+formato giusto e nel verso giusto, durata sotto i quattro mesi (piu' di cosi'
+e' quasi sempre un anno sbagliato), sigle di provincia valide, tipologie che
+esistono per quell'insegna, e la fonte presente. Se qualcosa non torna elenca
+tutti i problemi insieme e non stampa niente: meglio niente che meta'.
+L'impronta e' `sha256(ricerca|insegna|titolo|dal|al)`, quindi rilanciarlo
+aggiorna le campagne invece di duplicarle.
+
+**Ogni campagna porta con se' l'indirizzo da cui e' uscita la data**, in
+`flyers.source_url`. Fra un mese nessuno ricorda dove l'aveva letta, e una
+data sbagliata manda una segretaria davanti a un negozio vuoto.
+
+**Non tutte le insegne si comportano allo stesso modo**, e questo decide dove
+va il filtro:
+
+| Comportamento | Insegne | Cosa serve |
+|---|---|---|
+| Date uguali in tutta Italia | Lidl, Eurospin, MD, Penny, Esselunga | niente |
+| Date diverse per formato | Carrefour (Express, Market, Iper), Pam, Despar | `tipologie` |
+| Date diverse per zona | Conad, Coop, Despar | `province` |
+| Insegna gia' regionale | Deco (solo sud) | niente: ci pensa l'anagrafica |
+
+Conad e Coop restano i casi difficili anche per la ricerca: sono federazioni,
+e per una singola citta' spesso non si trova niente di aggiornato. Li' una
+telefonata al negozio vale piu' di dieci siti, ed e' il motivo per cui le date
+si confermano invece di fidarsi.
 
 **Niente crawling senza il gate legale.** `ops/scripts/check_robots.py` verifica
 `robots.txt` e archivia una copia datata in `storage/legal/`. Fallisce in modo
@@ -197,6 +276,7 @@ la stessa lettura tocca il suo archivio.
 | Autenticazione | accesso con email e password, ogni pagina protetta |
 | Messa in opera | in produzione su `gestionaletpmo.it/promosupermercati` dal 2026-09-17 |
 | Anagrafica punti vendita | importatore OSM pronto, **import non ancora eseguito**: l'archivio e' vuoto |
+| Date delle campagne | 13 campagne di settembre 2026 in `config/campagne.json`, tutte e 11 le insegne coperte. Conad e Coop **da confermare** |
 
 ## Cosa fare per primo
 
@@ -204,11 +284,16 @@ la stessa lettura tocca il suo archivio.
    Finche' l'archivio e' vuoto la dashboard non serve a niente: e' il passo
    che la trasforma in uno strumento. Va eseguito dal server, che raggiunge
    Overpass.
-2. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
+2. **Aggiornare `config/campagne.json` ogni settimana.** E' il lavoro
+   ricorrente del sistema: cercare le date nuove, annotare la fonte, rilanciare
+   l'importatore. Un'ora scarsa, e Lidl da sola cambia ogni giovedi'. Le
+   campagne di Conad e Coop vanno confermate telefonando a qualche negozio,
+   perche' la ricerca sulle federazioni non e' affidabile.
+3. **I Termini d'uso** di Conad, Carrefour e Lidl. Il `robots.txt` e' gia'
    verificato e consente (2026-09-17, copie in `storage/legal/`), ma e' solo
    meta' del gate: i ToS vietano spesso la raccolta automatica anche dove il
    robots tace. Finche' non sono letti e annotati, `enabled` resta `false`.
-3. **Il riscontro delle segretarie** dopo la sessione (vedi
+4. **Il riscontro delle segretarie** dopo la sessione (vedi
    `docs/sessione-segretarie.md`): attesi campi mancanti nella scheda del punto
    vendita e stati della richiesta diversi dai sei ipotizzati.
 
