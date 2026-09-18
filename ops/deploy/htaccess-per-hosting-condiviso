@@ -1,0 +1,33 @@
+# OsservatorioPromo - da copiare come .htaccess dentro dashboard/public/
+# quando si usa un hosting condiviso e non si puo' toccare la configurazione
+# del server.
+#
+# Se l'hosting non permette di puntare il dominio su dashboard/public e la
+# radice web resta quella del progetto, NON installare cosi': .env sarebbe
+# scaricabile. Vedi docs/messa-in-opera.md.
+
+RewriteEngine On
+
+# Niente reindirizzamento a HTTPS qui: dietro un proxy che termina il TLS,
+# Apache vede HTTPS=off anche per una richiesta cifrata e si finisce in un
+# ciclo di redirect. Si imposta al livello del dominio.
+
+# Il router e' scritto a mano: ogni percorso che non e' un file vero deve
+# arrivare a index.php.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
+<IfModule mod_headers.c>
+  # HSTS si decide al livello del dominio, non da un .htaccess di
+  # applicazione: vale per tutto il dominio e i suoi sottodomini.
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "same-origin"
+</IfModule>
+
+Options -Indexes
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>

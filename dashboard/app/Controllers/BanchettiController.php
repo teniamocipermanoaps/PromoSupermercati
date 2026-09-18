@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\Percorsi;
 use App\Core\View;
 use App\Models\StallRepository;
 use App\Models\StoreRepository;
@@ -24,11 +25,11 @@ final class BanchettiController
     public function crea(): void
     {
         if ((int) ($_POST['store_id'] ?? 0) <= 0 || ($_POST['event_date'] ?? '') === '') {
-            header('Location: /banchetti?errore=campi-mancanti');
+            header('Location: ' . Percorsi::a('/banchetti') . '?errore=campi-mancanti');
             return;
         }
 
         StallRepository::crea($_POST);
-        header('Location: /banchetti');
+        header('Location: ' . Percorsi::a('/banchetti'));
     }
 }

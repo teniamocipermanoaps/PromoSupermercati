@@ -1,5 +1,6 @@
 <?php
 use App\Core\Csrf;
+use App\Core\Percorsi;
 use App\Core\View;
 
 $euro = static fn (mixed $v): string => $v === null ? '—' : '€ ' . number_format((float) $v, 2, ',', '.');
@@ -38,7 +39,7 @@ $senzaPromo = $confronto['medio_senza_promo'] ?? null;
 
 <div class="riquadro">
   <h2>Registra un banchetto</h2>
-  <form method="post" action="/banchetti">
+  <form method="post" action="<?= Percorsi::base() ?>/banchetti">
     <?= Csrf::campo() ?>
     <div class="campi">
       <div>
@@ -86,7 +87,7 @@ $senzaPromo = $confronto['medio_senza_promo'] ?? null;
     <tbody>
     <?php foreach ($resa as $r): ?>
       <tr>
-        <td><a href="/punti-vendita/<?= (int) $r['store_id'] ?>"><?= View::e($r['punto_vendita']) ?></a></td>
+        <td><a href="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $r['store_id'] ?>"><?= View::e($r['punto_vendita']) ?></a></td>
         <td><span class="pill"><?= View::e($r['tipologia']) ?></span></td>
         <td class="numerico"><?= (int) $r['banchetti_svolti'] ?></td>
         <td class="numerico"><strong><?= $euro($r['raccolto_medio']) ?></strong></td>
@@ -106,7 +107,7 @@ $senzaPromo = $confronto['medio_senza_promo'] ?? null;
     <?php foreach ($banchetti as $b): ?>
       <tr>
         <td><?= date('d/m/Y', strtotime((string) $b['event_date'])) ?></td>
-        <td><a href="/punti-vendita/<?= (int) $b['store_id'] ?>"><?= View::e($b['punto_vendita']) ?></a></td>
+        <td><a href="<?= Percorsi::base() ?>/punti-vendita/<?= (int) $b['store_id'] ?>"><?= View::e($b['punto_vendita']) ?></a></td>
         <td><?= View::e($b['city']) ?></td>
         <td class="numerico"><?= $euro($b['donations_eur']) ?></td>
         <td><?= (int) $b['promo_active'] === 1 ? 'sì' : 'no' ?></td>

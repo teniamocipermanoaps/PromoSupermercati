@@ -176,3 +176,38 @@ dl.dati dd { margin: 0; }
   body { background: #fff; }
   .riquadro { border: none; padding: 0; }
 }
+
+/* Accesso ------------------------------------------------------------- */
+
+/* Il nome di chi sta lavorando e il bottone per uscire, in fondo alla barra. */
+.utente { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.utente .nome { color: var(--testo-tenue); font-size: 13px; font-weight: 600; }
+.utente form { margin: 0; }
+
+/* La pagina di accesso e' stretta: un solo compito, nessuna distrazione. */
+.accesso { max-width: 380px; margin: 40px auto 0; }
+.accesso .riquadro { padding: 20px; }
+.accesso button { width: 100%; }
+.nota-accesso { color: var(--testo-tenue); font-size: 13px; margin-top: 16px; }
+.nota-accesso code { font-size: 12px; word-break: break-all; }
+
+/* Elenco dei punti vendita e schede modificabili --------------------- */
+
+/* L'indirizzo sotto il nome: in una citta' ci sono dieci Conad, e senza
+   l'indirizzo bisognerebbe aprirli uno per uno. */
+.indirizzo { color: var(--testo-tenue); font-size: 12px; }
+.nota-campo { color: var(--testo-tenue); font-size: 12px; margin: 8px 0 14px; }
+.filtri { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.filtri .campo-largo { grid-column: 1 / -1; }
+.filtri button, .filtri .bottone { height: 38px; }
+
+/* Le province di una campagna: caselle invece di un elenco a scelta multipla,
+   perche' dal telefono il Ctrl+clic non esiste. */
+.province { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+            gap: 4px; max-height: 210px; overflow-y: auto; padding: 8px;
+            border: 1px solid var(--bordo); border-radius: var(--raggio); }
+.provincia { display: flex; align-items: center; gap: 6px; padding: 6px 4px;
+             border-radius: 4px; font-weight: 400; cursor: pointer; }
+.provincia:hover { background: var(--accento-tenue); }
+.provincia input { width: auto; margin: 0; }
+.provincia small { color: var(--testo-tenue); margin-left: auto; }

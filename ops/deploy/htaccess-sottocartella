@@ -1,0 +1,43 @@
+# OsservatorioPromo in una sottocartella su hosting condiviso.
+# Da copiare come .htaccess dentro la cartella pubblicata, cioe' quella che
+# contiene index.php (dashboard/public).
+#
+# In .env deve esserci:  APP_BASE_PATH=/promosupermercati
+#
+# ATTENZIONE: questo file protegge i percorsi, non i file. Se il clone intero
+# sta dentro la radice web, .env resta scaricabile per altre strade. La cartella
+# pubblicata deve contenere SOLO dashboard/public: sugli hosting che non lo
+# permettono, non installare.
+
+RewriteEngine On
+RewriteBase /promosupermercati
+
+# Niente reindirizzamento a HTTPS qui dentro. Dietro un proxy che termina il
+# TLS (Plesk con nginx davanti ad Apache e' il caso tipico) Apache vede
+# HTTPS=off anche per una richiesta arrivata cifrata: la regola rimanderebbe a
+# HTTPS all'infinito e la dashboard diventerebbe irraggiungibile. Il passaggio
+# a HTTPS si imposta al livello del dominio, dove il pannello ha gia' la sua
+# voce apposta.
+
+# Il router e' scritto a mano: ogni percorso che non e' un file vero deve
+# arrivare a index.php.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
+<IfModule mod_headers.c>
+  # Niente Strict-Transport-Security qui dentro. HSTS non vale per la cartella
+  # ma per l'intero dominio, e con includeSubDomains anche per i sottodomini:
+  # se uno di quelli non ha un certificato valido, i browser smettono di
+  # aprirlo e se lo ricordano per un anno. E' una decisione sul dominio, e va
+  # presa al livello del dominio, non da una sottocartella.
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "same-origin"
+</IfModule>
+
+Options -Indexes
+
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
